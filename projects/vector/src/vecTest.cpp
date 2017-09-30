@@ -164,6 +164,51 @@ void inputStreamTest(){
 	std::cout << "PASSED!" << std::endl;
 }
 
+void algebraicPropertiesTest(){
+	std::cout << __func__ << " ";
+	CGJM::Vec2 v1(1, 2);
+	CGJM::Vec2 v2(3, 4);
+	CGJM::Vec2 v3(5, 6);
+
+
+	/*Commutative*/
+	CGJM::Vec2 s1;
+	CGJM::Vec2 s2;
+	
+	s1 = v1 + v2;
+	s2 = v2 + v1;
+	assertFloat(s1[0], s2[0]);
+	assertFloat(s1[1], s2[1]);
+
+	/*Associative*/
+	s1 = (v1 + v2) + v3;
+	s2 = v1 + (v2 + v3);
+	assertFloat(s1[0], s2[0]);
+	assertFloat(s1[1], s2[1]);
+
+
+	/*Distributive (vector)*/
+	s1 = 3 * (v1 + v2);
+	s2 = 3 * v1 + 3 * v2;
+	assertFloat(s1[0], s2[0]);
+	assertFloat(s1[1], s2[1]);
+
+	/*Distributive (scalar)*/
+	s1 = (4 + 5) * v1;
+	s2 = 4 * v1 + 5* v1;
+	assertFloat(s1[0], s2[0]);
+	assertFloat(s1[1], s2[1]);
+
+	/*Associative (scalar)*/
+	s1 = 6 * (7 * v1);
+	s2 = (6 * 7) * v1;
+	assertFloat(s1[0], s2[0]);
+	assertFloat(s1[1], s2[1]);
+
+	std::cout << "PASSED!" << std::endl;
+}
+
+
 int main(int argc, char** argv){
 	
 	accessEmptyConstructorTest();
@@ -181,6 +226,8 @@ int main(int argc, char** argv){
 	multiplicationTest();
 
 	inputStreamTest();
+
+	algebraicPropertiesTest();
 
 	std::cout << "All tests passed!!\n";
 	return 0;
