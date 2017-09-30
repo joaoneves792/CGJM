@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <assert.h>
 #include "vec.h"
 
 using namespace CGJM;
@@ -9,23 +10,28 @@ Vec2::Vec2(){
 	vec[1]=0;
 }
 
-Vec2::Vec2(float x, float y){
+Vec2::Vec2(const float& x, const float& y){
 	vec[0]=x;
 	vec[1]=y;
 }
 
 
-Vec2::Vec2(Vec2& other){
+Vec2::Vec2(const Vec2& other){
 	vec[0]=other[0];
 	vec[1]=other[1];
 }
 
-float Vec2::operator[](std::size_t i){
-	return this->vec[i];
-	
+float Vec2::operator[](std::size_t i) const{
+	assert(i<2);
+	return (vec)[i];
 }
 
-std::ostream& Vec2::write(std::ostream& os){
+float& Vec2::operator[](std::size_t i){
+	assert(i<2);
+	return (vec)[i];
+}
+
+std::ostream& Vec2::write(std::ostream& os) const{
 	return os << "[ " << vec[0] << " " << vec[1] << " ]";
 }
 
@@ -50,28 +56,24 @@ std::istream& operator>>(std::istream& is, Vec2& v){
 }
 
 
-Vec2 Vec2::operator=(Vec2& other){
+const Vec2 Vec2::operator=(const Vec2& other){
 	vec[0] = other[0];
 	vec[1] = other[1];
 	return *this;
 }
 
-Vec2* Vec2::operator+(Vec2& right){
-	Vec2* newV = new Vec2(vec[0]+right[0], vec[1]+right[1]);
-	return newV;
+const Vec2 Vec2::operator+(const Vec2& right) const{
+	return Vec2(vec[0]+right[0], vec[1]+right[1]);
 }
 
-Vec2* Vec2::operator-(Vec2& right){
-	Vec2* newV = new Vec2(vec[0]-right[0], vec[1]-right[1]);
-	return newV;
+const Vec2 Vec2::operator-(const Vec2& right) const{
+	return Vec2(vec[0]-right[0], vec[1]-right[1]);
 }
 
-Vec2* operator*(Vec2& v, float scalar){
-	Vec2* newV = new Vec2(v[0]*scalar, v[1]*scalar);
-	return newV;
+const Vec2 operator*(const Vec2& v, float scalar){
+	return Vec2(v[0]*scalar, v[1]*scalar);
 }
 
-Vec2* operator*(float scalar, Vec2& v){
-	Vec2* newV = new Vec2(v[0]*scalar, v[1]*scalar);
-	return newV;
+const Vec2 operator*(float scalar, const Vec2& v){
+	return Vec2(v[0]*scalar, v[1]*scalar);
 }

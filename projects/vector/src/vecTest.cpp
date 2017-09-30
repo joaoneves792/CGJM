@@ -48,6 +48,19 @@ void accessVecConstructorTest(){
 	std::cout << "PASSED!" << std::endl;
 }
 
+void directAssignmentTest(){
+	std::cout << __func__ << " ";
+
+	CGJM::Vec2 v(1, 2);
+	v[0] = 1;
+	v[1] = 2;
+
+	assertFloat(v[0], 1);
+	assertFloat(v[1], 2);
+
+	std::cout << "PASSED!" << std::endl;
+}
+
 void outputTest(){
 	std::cout << __func__ << " ";
 	CGJM::Vec2 v(3.4, 7.3);
@@ -75,53 +88,47 @@ void assignmentTest(){
 
 void addTest(){
 	std::cout << __func__ << " ";
-	CGJM::Vec2* sum;
+	CGJM::Vec2 sum;
 	CGJM::Vec2 v1(1, 2);
 	CGJM::Vec2 v2(3, 4);
 
 	sum = v1 + v2;
 
-	assertFloat((*sum)[0], 4);
-	assertFloat((*sum)[1], 6);
-
-	delete sum;
+	assertFloat(sum[0], 4);
+	assertFloat(sum[1], 6);
 
 	std::cout << "PASSED!" << std::endl;
 }
 
 void subtractionTest(){
 	std::cout << __func__ << " ";
-	CGJM::Vec2* sub;
+	CGJM::Vec2 sub;
 	CGJM::Vec2 v1(1, 2);
 	CGJM::Vec2 v2(3, 5);
 
 	sub = v1 - v2;
 
-	assertFloat((*sub)[0], -2);
-	assertFloat((*sub)[1], -3);
+	assertFloat(sub[0], -2);
+	assertFloat(sub[1], -3);
 
-	delete sub;
 	std::cout << "PASSED!" << std::endl;
 }
 
 void multiplicationTest(){
 	std::cout << __func__ << " ";
-	CGJM::Vec2* product;
+	CGJM::Vec2 product;
 	CGJM::Vec2 v(3, 2);
 
 	product = v * 3;
 
-	assertFloat((*product)[0], 9);
-	assertFloat((*product)[1], 6);
-
-	delete product;
+	assertFloat(product[0], 9);
+	assertFloat(product[1], 6);
 
 	product = 2 * v;
 	
-	assertFloat((*product)[0], 6);
-	assertFloat((*product)[1], 4);
+	assertFloat(product[0], 6);
+	assertFloat(product[1], 4);
 
-	delete product;
 	std::cout << "PASSED!" << std::endl;
 }
 
@@ -162,6 +169,8 @@ int main(int argc, char** argv){
 	accessEmptyConstructorTest();
 	accessFloatConstructorTest();
 	accessVecConstructorTest();
+
+	directAssignmentTest();
 
 	outputTest();
 	
