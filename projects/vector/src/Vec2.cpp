@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <cmath>
 #include <assert.h>
 #include "vec.h"
 
@@ -20,6 +21,22 @@ Vec2::Vec2(const Vec2& other){
 	vec[0]=other[0];
 	vec[1]=other[1];
 }
+
+
+float Vec2::quadrance(){
+	return vec[0]*vec[0]+vec[1]*vec[1];
+}
+
+float Vec2::norm(){
+	return std::sqrt(vec[0]*vec[0]+vec[1]*vec[1]);
+}
+
+void Vec2::normalize(){
+	float length = norm();
+	vec[0] = vec[0]/length;
+	vec[1] = vec[1]/length;
+}
+
 
 float Vec2::operator[](std::size_t i) const{
 	assert(i<2);
@@ -76,4 +93,9 @@ const Vec2 operator*(const Vec2& v, float scalar){
 
 const Vec2 operator*(float scalar, const Vec2& v){
 	return Vec2(v[0]*scalar, v[1]*scalar);
+}
+
+
+float CGJM::dot(const Vec2& v1, const Vec2& v2){
+	return v1[0]*v2[0]+v1[1]*v2[1];
 }
