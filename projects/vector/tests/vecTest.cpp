@@ -157,8 +157,7 @@ void vec2inputStreamTest(){
 	CGJM::Vec2 v;
 
 	std::istringstream* iss = new std::istringstream("[ 3 4 ]\n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	(*iss) >> v;
 
 	assertFloat(v[0], 3);
 	assertFloat(v[1], 4);
@@ -166,16 +165,14 @@ void vec2inputStreamTest(){
 
 
 	iss = new std::istringstream(" 5 6 \n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	(*iss) >> v;
 
 	assertFloat(v[0], 5);
 	assertFloat(v[1], 6);
 	delete iss;
 	
 	iss = new std::istringstream("7 8\n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	(*iss) >> v;
 
 	assertFloat(v[0], 7);
 	assertFloat(v[1], 8);
@@ -460,9 +457,8 @@ void vec3inputStreamTest(){
 	std::cout << __func__ << " ";
 	CGJM::Vec3 v;
 
-	std::istringstream* iss = new std::istringstream("[ 3 4 5 ]\n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	std::istringstream* iss = new std::istringstream("[ 3 4 5 ]\n");
+	(*iss) >> v;
 
 	assertFloat(v[0], 3);
 	assertFloat(v[1], 4);
@@ -471,8 +467,7 @@ void vec3inputStreamTest(){
 
 
 	iss = new std::istringstream(" 5 6 7 \n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	(*iss) >> v;
 
 	assertFloat(v[0], 5);
 	assertFloat(v[1], 6);
@@ -480,13 +475,13 @@ void vec3inputStreamTest(){
 	delete iss;
 	
 	iss = new std::istringstream("7 8 9\n"); 
-	std::cin.rdbuf((*iss).rdbuf());
-	std::cin >> v;
+	(*iss) >> v;
 
 	assertFloat(v[0], 7);
 	assertFloat(v[1], 8);
 	assertFloat(v[2], 9);
 	delete iss;
+
 	std::cout << "PASSED!" << std::endl;
 }
 
@@ -663,7 +658,11 @@ int main(){
 	vec3normalizeTest();
 	vec3dotTest();
 	vec3crossTest();
-	std::cout << "All tests passed!!" << std::endl;
+	std::cout << "All tests passed!! Press Enter to close..." << std::endl;
+
+	std::string str;
+	std::getline(std::cin, str);
+
 	return 0;
 }
 
