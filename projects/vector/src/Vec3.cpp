@@ -64,7 +64,7 @@ std::ostream& operator<<(std::ostream& os, Vec3& v){
 std::istream& Vec3::read(std::istream& is){
 	std::string line;
 	getline(is, line);
-	for(int i=0;i<line.length();i++)
+	for(unsigned int i=0;i<line.length();i++)
 		if(line[i] == '[' || line[i] == ']')
 			line[i] = ' ';
 	std::istringstream iss(line);
@@ -73,7 +73,7 @@ std::istream& Vec3::read(std::istream& is){
 }
 
 std::istream& operator>>(std::istream& is, Vec3& v){
-	v.read(is);
+	return v.read(is);
 }
 
 
