@@ -2,6 +2,8 @@
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -624,6 +626,49 @@ void vec3crossTest(){
 
 	std::cout << "PASSED!" << std::endl;
 }
+
+
+float randomNumber(float Min, float Max)
+{
+    return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
+}
+
+void vec3TripleProduct(){
+	srand(static_cast <unsigned> (time(0)));
+	for(int q=0; q<10; q++){
+		CGJM::Vec3 i(randomNumber(-10, 10),
+				randomNumber(-10, 10),
+				randomNumber(-10, 10));
+
+		CGJM::Vec3 k(randomNumber(-10, 10),
+				randomNumber(-10, 10),
+				randomNumber(-10, 10));
+		
+		CGJM::Vec3 j(randomNumber(-10, 10),
+				randomNumber(-10, 10),
+				randomNumber(-10, 10));
+
+
+		std::cout << "Vectors i, j, k: " << std::endl;
+		std::cout << i << std::endl;	
+		std::cout << j << std::endl;	
+		std::cout << k << std::endl;	
+
+
+		CGJM::Vec3 v1 = CGJM::cross(i, CGJM::cross(j, k));
+		CGJM::Vec3 v2 = j*CGJM::dot(i, k) - k*CGJM::dot(i, j);
+		std::cout << "i x (j x k) = " << v1 << std::endl;
+		std::cout << "j(i.k)-k(i.j) = " << v2 << std::endl;
+
+
+		assertFloat(v1[0], v2[0]);
+		assertFloat(v1[1], v2[1]);
+		assertFloat(v1[2], v2[2]);
+
+
+	}
+}
+
 int main(){
 	
 	vec2accessEmptyConstructorTest();
@@ -658,7 +703,9 @@ int main(){
 	vec3normalizeTest();
 	vec3dotTest();
 	vec3crossTest();
+	vec3TripleProduct();
 	std::cout << "All tests passed!! Press Enter to close..." << std::endl;
+
 
 	std::string str;
 	std::getline(std::cin, str);
