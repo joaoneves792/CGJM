@@ -18,9 +18,12 @@ public:
 
 	const float* operator[](std::size_t i) const;
 	const Mat2 operator=(const Mat2& other);
+	bool operator==(const Mat2& other);
+	bool operator!=(const Mat2& other);
 	const Mat2 operator+(const Mat2& right) const;
 	const Mat2 operator-(const Mat2& right) const;
 	const Mat2 operator*(const Mat2& right) const;
+	const Vec2 operator*(const Vec2& v) const;
 };
 }
 
@@ -28,6 +31,5 @@ public:
 
 using namespace CGJM;
 std::ostream& operator<<(std::ostream &os, Mat2& v);
-const Mat2 operator*(const Mat2& m, float scalar);
-const Mat2 operator*(float scalar, const Mat2& m);
-const Mat2 operator*(const Mat2& m, const Vec2& v);
+const Mat2 operator*(const Mat2& A, float scalar);
+const Mat2 operator*(float scalar, const Mat2& A);
