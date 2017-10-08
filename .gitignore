@@ -7,3 +7,5 @@
 *CMakeFiles
 */bin/*
 !.gitignore
+*/build/
+build

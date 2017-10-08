@@ -16,10 +16,14 @@ public:
 
 	std::ostream& write(std::ostream& os) const;
 
+	const Mat2 transpose() const;
+	const Mat2 inverse() const;
+	float determinant() const;
+
 	const float* operator[](std::size_t i) const;
 	const Mat2 operator=(const Mat2& other);
-	bool operator==(const Mat2& other);
-	bool operator!=(const Mat2& other);
+	bool operator==(const Mat2& other)const;
+	bool operator!=(const Mat2& other)const;
 	const Mat2 operator+(const Mat2& right) const;
 	const Mat2 operator-(const Mat2& right) const;
 	const Mat2 operator*(const Mat2& right) const;
@@ -30,6 +34,6 @@ public:
 
 
 using namespace CGJM;
-std::ostream& operator<<(std::ostream &os, Mat2& v);
+std::ostream& operator<<(std::ostream &os, const Mat2& v);
 const Mat2 operator*(const Mat2& A, float scalar);
 const Mat2 operator*(float scalar, const Mat2& A);

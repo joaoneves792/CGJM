@@ -229,6 +229,27 @@ void mat2VectorProductTest(){
 	std::cout << "PASSED!" << std::endl;
 }
 
+void mat2TransposeTest(){
+	std::cout << __func__ << " ";
+	CGJM::Mat2 A(1, 2, 3, 4);
+	CGJM::Mat2 E(1, 3, 2, 4);
+
+	assertTrue(A.transpose()==E);
+
+	std::cout << "PASSED!" << std::endl;
+}
+
+void mat2InverseTest(){
+	std::cout << __func__ << " ";
+	CGJM::Mat2 A(4.3, -5.2, 100, -43.3);
+	CGJM::Mat2 I(1);
+
+	assertTrue(A*A.inverse()==I);
+
+	std::cout << "PASSED!" << std::endl;
+}
+
+
 int main(){
 	
 	mat2accessEmptyConstructorTest();
@@ -242,7 +263,8 @@ int main(){
 	mat2ScalarProductTest();
 	mat2mat2ProductTest();
 	mat2VectorProductTest();
-
+	mat2TransposeTest();
+	mat2InverseTest();
 
 	std::cout << "All tests passed!! Press Enter to close..." << std::endl;
 

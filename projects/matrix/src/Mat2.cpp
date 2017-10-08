@@ -53,7 +53,7 @@ std::ostream& Mat2::write(std::ostream& os) const{
 }
 
 
-std::ostream& operator<<(std::ostream& os, Mat2& v){
+std::ostream& operator<<(std::ostream& os, const Mat2& v){
 	return v.write(os);
 }
 
@@ -65,7 +65,7 @@ const Mat2 Mat2::operator=(const Mat2& other){
 	return *this;
 }
 
-bool Mat2::operator==(const Mat2& other){
+bool Mat2::operator==(const Mat2& other)const{
 #ifndef EPSILON
 #define EPSILON 0.001
 #endif
@@ -77,7 +77,7 @@ bool Mat2::operator==(const Mat2& other){
 
 }
 
-bool Mat2::operator!=(const Mat2& other){
+bool Mat2::operator!=(const Mat2& other) const{
 	return !(*this==other);
 }
 
@@ -113,4 +113,17 @@ const Mat2 Mat2::operator*(const Mat2& right) const{
 const Vec2 Mat2::operator*(const Vec2& v) const{
 	return Vec2(mat[0][0]*v[0]+mat[0][1]*v[1],
 			mat[1][0]*v[0]+mat[1][1]*v[1]);
+}
+const Mat2 Mat2::transpose() const{
+	return Mat2(mat[0][0], mat[1][0], mat[0][1], mat[1][1]);
+}
+
+float Mat2::determinant() const{
+	return mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
+}
+
+const Mat2 Mat2::inverse() const{
+	float detInverse = 1/determinant();
+	return Mat2(detInverse*mat[1][1], -detInverse*mat[0][1],
+			-detInverse*mat[1][0], detInverse*mat[0][0]);
 }
