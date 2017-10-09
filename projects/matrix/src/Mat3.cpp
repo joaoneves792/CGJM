@@ -183,18 +183,6 @@ float Mat3::determinant() const{
 
 const Mat3 Mat3::inverse() const{
 	float detInverse = 1/determinant();
-	//Mat3 transpost = transpose();
-	/*Mat3 adjugate = Mat3(
-			Mat2(transpost[1][1], transpost[1][2], transpost[2][1], transpost[2][2]).determinant()*detInverse,
-		       -Mat2(transpost[1][0], transpost[1][2], transpost[2][0], transpost[2][2]).determinant()*detInverse,
-                        Mat2(transpost[1][0], transpost[1][1], transpost[2][0], transpost[2][1]).determinant()*detInverse,
-		       -Mat2(transpost[0][1], transpost[0][2], transpost[2][1], transpost[2][2]).determinant()*detInverse,
-		        Mat2(transpost[0][0], transpost[0][2], transpost[2][0], transpost[2][2]).determinant()*detInverse,
-		       -Mat2(transpost[0][0], transpost[0][1], transpost[2][0], transpost[2][1]).determinant()*detInverse,
-		        Mat2(transpost[0][1], transpost[0][2], transpost[1][1], transpost[1][2]).determinant()*detInverse,
-		       -Mat2(transpost[0][0], transpost[0][2], transpost[1][0], transpost[1][2]).determinant()*detInverse,
-		        Mat2(transpost[0][0], transpost[0][1], transpost[1][0], transpost[1][1]).determinant()*detInverse
-			);*/
 	return Mat3(
 			Mat2(mat[1][1], mat[2][1], mat[1][2], mat[2][2]).determinant()*detInverse,
 		       -Mat2(mat[0][1], mat[2][1], mat[0][2], mat[2][2]).determinant()*detInverse,
