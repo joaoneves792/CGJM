@@ -53,7 +53,7 @@ public:
 	bool operator!=(const Mat3& other)const;
 	const Mat3 operator+(const Mat3& right) const;
 	const Mat3 operator-(const Mat3& right) const;
-	const Mat3 operator*(const Mat2& right) const;
+	const Mat3 operator*(const Mat3& right) const;
 	const Vec3 operator*(const Vec3& v) const;
 };
 }
@@ -62,5 +62,8 @@ public:
 
 using namespace CGJM;
 std::ostream& operator<<(std::ostream &os, const Mat2& v);
+std::ostream& operator<<(std::ostream &os, const Mat3& v);
 const Mat2 operator*(const Mat2& A, float scalar);
 const Mat2 operator*(float scalar, const Mat2& A);
+const Mat3 operator*(const Mat3& A, float scalar);
+const Mat3 operator*(float scalar, const Mat3& A);
