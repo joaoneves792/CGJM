@@ -184,14 +184,14 @@ float Mat3::determinant() const{
 const Mat3 Mat3::inverse() const{
 	float detInverse = 1/determinant();
 	return Mat3(
-			Mat2(mat[1][1], mat[2][1], mat[1][2], mat[2][2]).determinant()*detInverse,
-		       -Mat2(mat[0][1], mat[2][1], mat[0][2], mat[2][2]).determinant()*detInverse,
-                        Mat2(mat[0][1], mat[1][1], mat[0][2], mat[1][2]).determinant()*detInverse,
-		       -Mat2(mat[1][0], mat[2][0], mat[1][2], mat[2][2]).determinant()*detInverse,
-		        Mat2(mat[0][0], mat[2][0], mat[0][2], mat[2][2]).determinant()*detInverse,
-		       -Mat2(mat[0][0], mat[1][0], mat[0][2], mat[1][2]).determinant()*detInverse,
-		        Mat2(mat[1][0], mat[2][0], mat[1][1], mat[2][1]).determinant()*detInverse,
-		       -Mat2(mat[0][0], mat[2][0], mat[0][1], mat[2][1]).determinant()*detInverse,
-		        Mat2(mat[0][0], mat[1][0], mat[0][1], mat[1][1]).determinant()*detInverse
+			(mat[1][1]*mat[2][2]-mat[2][1]*mat[1][2])*detInverse,
+		       -(mat[0][1]*mat[2][2]-mat[2][1]*mat[0][2])*detInverse,
+                        (mat[0][1]*mat[1][2]-mat[1][1]*mat[0][2])*detInverse,
+		       -(mat[1][0]*mat[2][2]-mat[2][0]*mat[1][2])*detInverse,
+		        (mat[0][0]*mat[2][2]-mat[2][0]*mat[0][2])*detInverse,
+		       -(mat[0][0]*mat[1][2]-mat[1][0]*mat[0][2])*detInverse,
+		        (mat[1][0]*mat[2][1]-mat[2][0]*mat[1][1])*detInverse,
+		       -(mat[0][0]*mat[2][1]-mat[2][0]*mat[0][1])*detInverse,
+		        (mat[0][0]*mat[1][1]-mat[1][0]*mat[0][1])*detInverse
 			);
 }
