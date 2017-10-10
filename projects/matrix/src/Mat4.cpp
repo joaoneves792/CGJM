@@ -206,38 +206,111 @@ const Vec3 Mat4::operator*(const Vec3& v) const{
 //TODO -->>
 
 const Mat4 Mat4::operator*(const Mat4& right) const{
-	return Mat4(mat[0][0]*right[0][0]+mat[0][1]*right[1][0]+mat[0][2]*right[2][0],
-	            mat[0][0]*right[0][1]+mat[0][1]*right[1][1]+mat[0][2]*right[2][1],
-	            mat[0][0]*right[0][2]+mat[0][1]*right[1][2]+mat[0][2]*right[2][2],
+	return Mat4(mat[0][0]*right[0][0]+mat[0][1]*right[1][0]+mat[0][2]*right[2][0]+mat[0][3]*right[3][0],
+	            mat[0][0]*right[0][1]+mat[0][1]*right[1][1]+mat[0][2]*right[2][1]+mat[0][3]*right[3][1],
+	            mat[0][0]*right[0][2]+mat[0][1]*right[1][2]+mat[0][2]*right[2][2]+mat[0][3]*right[3][2],
+	            mat[0][0]*right[0][3]+mat[0][1]*right[1][3]+mat[0][2]*right[2][3]+mat[0][3]*right[3][3],
 	            
-		    mat[1][0]*right[0][0]+mat[1][1]*right[1][0]+mat[1][2]*right[2][0],
-	            mat[1][0]*right[0][1]+mat[1][1]*right[1][1]+mat[1][2]*right[2][1],
-	            mat[1][0]*right[0][2]+mat[1][1]*right[1][2]+mat[1][2]*right[2][2],
+		    mat[1][0]*right[0][0]+mat[1][1]*right[1][0]+mat[1][2]*right[2][0]+mat[1][3]*right[3][0],
+	            mat[1][0]*right[0][1]+mat[1][1]*right[1][1]+mat[1][2]*right[2][1]+mat[1][3]*right[3][1],
+	            mat[1][0]*right[0][2]+mat[1][1]*right[1][2]+mat[1][2]*right[2][2]+mat[1][3]*right[3][2],
+	            mat[1][0]*right[0][3]+mat[1][1]*right[1][3]+mat[1][2]*right[2][3]+mat[1][3]*right[3][3],
 		    
-		    mat[2][0]*right[0][0]+mat[2][1]*right[1][0]+mat[2][2]*right[2][0],
-	            mat[2][0]*right[0][1]+mat[2][1]*right[1][1]+mat[2][2]*right[2][1],
-	            mat[2][0]*right[0][2]+mat[2][1]*right[1][2]+mat[2][2]*right[2][2]);
+		    mat[2][0]*right[0][0]+mat[2][1]*right[1][0]+mat[2][2]*right[2][0]+mat[2][3]*right[3][0],
+	            mat[2][0]*right[0][1]+mat[2][1]*right[1][1]+mat[2][2]*right[2][1]+mat[2][3]*right[3][1],
+	            mat[2][0]*right[0][2]+mat[2][1]*right[1][2]+mat[2][2]*right[2][2]+mat[2][3]*right[3][2],
+	            mat[2][0]*right[0][3]+mat[2][1]*right[1][3]+mat[2][2]*right[2][3]+mat[2][3]*right[3][3],
+		    
+		    mat[3][0]*right[0][0]+mat[3][1]*right[1][0]+mat[3][2]*right[2][0]+mat[3][3]*right[3][0],
+	            mat[3][0]*right[0][1]+mat[3][1]*right[1][1]+mat[3][2]*right[2][1]+mat[3][3]*right[3][1],
+	            mat[3][0]*right[0][2]+mat[3][1]*right[1][2]+mat[3][2]*right[2][2]+mat[3][3]*right[3][2],
+	            mat[3][0]*right[0][3]+mat[3][1]*right[1][3]+mat[3][2]*right[2][3]+mat[3][3]*right[3][3]);
 }
 
 const Mat4 Mat4::transpose() const{
-	return Mat4(mat[0][0], mat[1][0], mat[2][0],
-		    mat[0][1], mat[1][1], mat[2][1],
-		    mat[0][2], mat[1][2], mat[2][2] );
+	return Mat4(mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+		    mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+		    mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+		    mat[0][3], mat[1][3], mat[2][3], mat[3][3] );
 }
 
 float Mat4::determinant() const{
-	return (mat[0][0]*mat[1][1]*mat[2][2])+
-	       (mat[0][1]*mat[1][2]*mat[2][0])+
-	       (mat[0][2]*mat[1][0]*mat[2][1])-
+	/*var det = a11 * (a22*(a33*a44 - a43*a34) - a23*(a32*a44 - a42*a34) + a24*(a32*a43 - a42*a33)) 
+                  - a12 * (a21*(a33*a44 - a43*a34) - a23*(a31*a44 - a41*a34) + a24*(a31*a43 - a41*a33)) 
+		  + a13 * (a21*(a32*a44 - a42*a34) - a22*(a31*a44 - a41*a34) + a24 *(a31*a42 - a41*a32))
+		  - a14 * (a21*(a32*a43 - a42*a33) - a22*(a31*a43 - a41*a33) + a23 *(a31*a42 - a41*a32));*/
 
-	       (mat[0][2]*mat[1][1]*mat[2][0])-
-	       (mat[0][0]*mat[1][2]*mat[2][1])-
-	       (mat[0][1]*mat[1][0]*mat[2][2]);
+	return mat[0][0] * (mat[1][1]*(mat[2][2]*mat[3][3] - mat[3][2]*mat[2][3]) 
+			  - mat[1][2]*(mat[2][1]*mat[3][3] - mat[3][1]*mat[2][3])
+			  + mat[1][3]*(mat[2][1]*mat[3][2] - mat[3][1]*mat[2][2]))
+	     - mat[0][1] * (mat[1][0]*(mat[2][2]*mat[3][3] - mat[3][2]*mat[2][3])
+			  - mat[1][2]*(mat[2][0]*mat[3][3] - mat[3][0]*mat[2][3])
+			  + mat[1][3]*(mat[2][0]*mat[3][2] - mat[3][0]*mat[2][2]))
+	     + mat[0][2] * (mat[1][0]*(mat[2][1]*mat[3][3] - mat[3][1]*mat[2][3])
+			  - mat[1][1]*(mat[2][0]*mat[3][3] - mat[3][0]*mat[2][3])
+			  + mat[1][3]*(mat[2][0]*mat[3][1] - mat[3][0]*mat[2][1]))
+	     - mat[0][3] * (mat[1][0]*(mat[2][1]*mat[3][2] - mat[3][1]*mat[2][2])
+			  - mat[1][1]*(mat[2][0]*mat[3][2] - mat[3][0]*mat[2][2])
+			  + mat[1][2]*(mat[2][0]*mat[3][1] - mat[3][0]*mat[2][1]));
+		
 }
 
 const Mat4 Mat4::inverse() const{
 	float detInverse = 1/determinant();
-	return Mat4(
+	Mat4 transpost = transpose();
+
+	return Mat4( (Mat3(transpost[1][1], transpost[1][2], transpost[1][3],
+		           transpost[2][1], transpost[2][2], transpost[2][3],
+			   transpost[3][1], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		    -(Mat3(transpost[1][0], transpost[1][2], transpost[1][3],
+		           transpost[2][0], transpost[2][2], transpost[2][3],
+			   transpost[3][0], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		     (Mat3(transpost[1][0], transpost[1][1], transpost[1][3],
+		           transpost[2][0], transpost[2][1], transpost[2][3],
+			   transpost[3][0], transpost[3][1], transpost[3][3]).determinant()*detInverse),
+		    -(Mat3(transpost[1][0], transpost[1][1], transpost[1][2],
+		           transpost[2][0], transpost[2][1], transpost[2][2],
+			   transpost[3][0], transpost[3][1], transpost[3][2]).determinant()*detInverse),
+
+		    -(Mat3(transpost[0][1], transpost[0][2], transpost[0][3],
+		           transpost[2][1], transpost[2][2], transpost[2][3],
+			   transpost[3][1], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		     (Mat3(transpost[0][0], transpost[0][2], transpost[0][3],
+		           transpost[2][0], transpost[2][2], transpost[2][3],
+			   transpost[3][0], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		    -(Mat3(transpost[0][0], transpost[0][1], transpost[0][3],
+		           transpost[2][0], transpost[2][1], transpost[2][3],
+			   transpost[3][0], transpost[3][1], transpost[3][3]).determinant()*detInverse),
+		     (Mat3(transpost[0][0], transpost[0][1], transpost[0][2],
+		           transpost[2][0], transpost[2][1], transpost[2][2],
+			   transpost[3][0], transpost[3][1], transpost[3][2]).determinant()*detInverse),
+
+		     (Mat3(transpost[0][1], transpost[0][2], transpost[0][3],
+		           transpost[1][1], transpost[1][2], transpost[1][3],
+			   transpost[3][1], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		    -(Mat3(transpost[0][0], transpost[0][2], transpost[0][3],
+		           transpost[1][0], transpost[1][2], transpost[1][3],
+			   transpost[3][0], transpost[3][2], transpost[3][3]).determinant()*detInverse),
+		     (Mat3(transpost[0][0], transpost[0][1], transpost[0][3],
+		           transpost[1][0], transpost[1][1], transpost[1][3],
+			   transpost[3][0], transpost[3][1], transpost[3][3]).determinant()*detInverse),
+		    -(Mat3(transpost[0][0], transpost[0][1], transpost[0][2],
+		           transpost[1][0], transpost[1][1], transpost[1][2],
+			   transpost[3][0], transpost[3][1], transpost[3][2]).determinant()*detInverse),
+		    
+		    -(Mat3(transpost[0][1], transpost[0][2], transpost[0][3],
+		           transpost[1][1], transpost[1][2], transpost[1][3],
+			   transpost[2][1], transpost[2][2], transpost[2][3]).determinant()*detInverse),
+		     (Mat3(transpost[0][0], transpost[0][2], transpost[0][3],
+		           transpost[1][0], transpost[1][2], transpost[1][3],
+			   transpost[2][0], transpost[2][2], transpost[2][3]).determinant()*detInverse),
+		    -(Mat3(transpost[0][0], transpost[0][1], transpost[0][3],
+		           transpost[1][0], transpost[1][1], transpost[1][3],
+			   transpost[2][0], transpost[2][1], transpost[2][3]).determinant()*detInverse),
+		     (Mat3(transpost[0][0], transpost[0][1], transpost[0][2],
+		           transpost[1][0], transpost[1][1], transpost[1][2],
+			   transpost[2][0], transpost[2][1], transpost[2][2]).determinant()*detInverse));
+	/*return Mat4(
 			(mat[1][1]*mat[2][2]-mat[2][1]*mat[1][2])*detInverse,
 		       -(mat[0][1]*mat[2][2]-mat[2][1]*mat[0][2])*detInverse,
                         (mat[0][1]*mat[1][2]-mat[1][1]*mat[0][2])*detInverse,
@@ -247,5 +320,5 @@ const Mat4 Mat4::inverse() const{
 		        (mat[1][0]*mat[2][1]-mat[2][0]*mat[1][1])*detInverse,
 		       -(mat[0][0]*mat[2][1]-mat[2][0]*mat[0][1])*detInverse,
 		        (mat[0][0]*mat[1][1]-mat[1][0]*mat[0][1])*detInverse
-			);
+			);*/
 }
