@@ -20,6 +20,8 @@ public:
 
 	float& operator[](std::size_t i);
 	float operator[](std::size_t i) const;
+	bool operator==(const Vec2& other)const;
+	bool operator!=(const Vec2& other)const;
 	const Vec2 operator=(const Vec2& other);
 	const Vec2 operator+(const Vec2& right) const;
 	const Vec2 operator-(const Vec2& right) const;
@@ -42,6 +44,8 @@ public:
 
 	float& operator[](std::size_t i);
 	float operator[](std::size_t i) const;
+	bool operator==(const Vec3& other)const;
+	bool operator!=(const Vec3& other)const;
 	const Vec3 operator=(const Vec3& other);
 	const Vec3 operator+(const Vec3& right) const;
 	const Vec3 operator-(const Vec3& right) const;

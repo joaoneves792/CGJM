@@ -41,6 +41,22 @@ Mat2::Mat2(const Mat2& other){
 	mat[1][1]=other[1][1];
 }
 
+Mat2::Mat2(const Mat3& other){
+	mat[0][0]=other[0][0];
+	mat[0][1]=other[0][1];
+
+	mat[1][0]=other[1][0];
+	mat[1][1]=other[1][1];
+}
+
+Mat2::Mat2(const Mat4& other){
+	mat[0][0]=other[0][0];
+	mat[0][1]=other[0][1];
+
+	mat[1][0]=other[1][0];
+	mat[1][1]=other[1][1];
+}
+
 
 const float* Mat2::operator[](std::size_t i) const{
 	assert(i<2);

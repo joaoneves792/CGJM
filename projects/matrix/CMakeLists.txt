@@ -11,7 +11,8 @@ set(HEADER_FILES
 set(SOURCE_FILES
   src/Mat2.cpp 
   src/Mat3.cpp 
-  src/Mat4.cpp)
+  src/Mat4.cpp 
+  src/transforms.cpp)
 
 set(MAT2_TEST
   tests/mat2Test.cpp)

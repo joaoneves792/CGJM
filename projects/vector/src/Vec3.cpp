@@ -84,6 +84,19 @@ const Vec3 Vec3::operator=(const Vec3& other){
 	return *this;
 }
 
+bool Vec3::operator==(const Vec3& other)const{
+#ifndef EPSILON
+#define EPSILON 0.001
+#endif
+	return ((std::abs(vec[0]-other[0]) < EPSILON) &&
+		(std::abs(vec[1]-other[1]) < EPSILON) &&
+		(std::abs(vec[2]-other[2]) < EPSILON));
+
+}
+
+bool Vec3::operator!=(const Vec3& other) const{
+	return !(*this==other);
+}
 const Vec3 Vec3::operator+(const Vec3& right) const{
 	return Vec3(vec[0]+right[0], vec[1]+right[1], vec[2]+right[2]);
 }
