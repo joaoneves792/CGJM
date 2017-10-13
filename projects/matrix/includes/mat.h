@@ -90,12 +90,11 @@ public:
 	const Vec2 operator*(const Vec2& v) const;
 };
 
-Mat4 scale(const float& x, const float& y, const float& z);
-Mat4 rotate(const Vec3& axis, const float& angle);
-Mat4 translate(const float& x, const float& y, const float& z);
-
+const Mat4 scale(const float& x, const float& y, const float& z);
+const Mat4 rotate(const Vec3& axis, const float& angle);
+const Mat4 translate(const float& x, const float& y, const float& z);
+const Mat3 dualMatrix(const Vec3& v);
 }
-
 
 
 using namespace CGJM;

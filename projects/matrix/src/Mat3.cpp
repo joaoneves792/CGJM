@@ -209,3 +209,10 @@ const Mat3 Mat3::inverse() const{
 		        (mat[0][0]*mat[1][1]-mat[1][0]*mat[0][1])*detInverse
 			);
 }
+
+const Mat3 CGJM::dualMatrix(const Vec3& v){
+		return	CGJM::Mat3(0, -v[2], v[1], 
+				   v[2], 0, -v[0],
+				  -v[1], v[0], 0);
+}
+

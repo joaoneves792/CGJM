@@ -53,7 +53,7 @@ std::ostream& Vec2::write(std::ostream& os) const{
 }
 
 
-std::ostream& operator<<(std::ostream& os, Vec2& v){
+std::ostream& operator<<(std::ostream& os, const Vec2& v){
 	return v.write(os);
 }
 

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -357,6 +358,9 @@ void mat4AlgebraicPropertiesTest(){
 
 	std::cout << "PASSED!" << std::endl;
 }
+
+
+
 int main(){
 	srand(static_cast <unsigned> (time(0)));
 	

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -296,6 +297,22 @@ void mat3InverseTest(){
 	std::cout << "PASSED!" << std::endl;
 }
 
+void mat3RodriguesTest(){
+	std::cout << __func__ << " ";
+		
+	std::vector<Vec3> v = { CGJM::Vec3(1, 0, 0),  CGJM::Vec3(0, 2, 0), CGJM::Vec3(0, 0, 3) };
+
+	for( Vec3 w : v){
+		for( Vec3 r : v){
+			r.normalize();
+			CGJM::Mat3 K = CGJM::dualMatrix(r);
+			CGJM::Mat3 R = CGJM::Mat3(1)+K*(std::sin(M_PI/2))+(1-std::cos(M_PI/2))*(K*K); //Rodrigues Rotation matrix for 90 degrees around x
+			std::cout << w << " rotated 90d around " << r << " = " << R*w << std::endl;
+		}
+	}
+	
+	std::cout << "PASSED!" << std::endl;
+}
 
 int main(){
 	
@@ -312,6 +329,8 @@ int main(){
 	mat3VectorProductTest();
 	mat3TransposeTest();
 	mat3InverseTest();
+
+	mat3RodriguesTest();
 
 	std::cout << "All tests passed!! Press Enter to close..." << std::endl;
 

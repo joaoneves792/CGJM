@@ -4,14 +4,14 @@
 
 using namespace CGJM;
 
-Mat4 CGJM::scale(const float& x, const float& y, const float& z){
+const Mat4 CGJM::scale(const float& x, const float& y, const float& z){
 	return Mat4(x, 0, 0, 0,
 		    0, y, 0, 0,
 		    0, 0, z, 0,
 		    0, 0, 0, 1);
 }
 
-Mat4 CGJM::rotate(const Vec3& axis, const float& angle){
+const Mat4 CGJM::rotate(const Vec3& axis, const float& angle){
 #define __COS std::cos(angle)
 #define __1_COS (1-std::cos(angle))
 #define __SIN std::sin(angle)
@@ -24,7 +24,7 @@ Mat4 CGJM::rotate(const Vec3& axis, const float& angle){
 		     0, 0, 0, 1);
 }
 
-Mat4 CGJM::translate(const float& x, const float& y, const float& z){
+const Mat4 CGJM::translate(const float& x, const float& y, const float& z){
 	return Mat4(1, 0, 0, x,
 		    0, 1, 0, y,
 		    0, 0, 1, z,

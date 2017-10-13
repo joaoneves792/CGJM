@@ -60,8 +60,8 @@ const Vec3 cross(const Vec3& v1, const Vec3& v2);
 
 
 using namespace CGJM;
-std::ostream& operator<<(std::ostream &os, Vec2& v);
-std::ostream& operator<<(std::ostream &os, Vec3& v);
+std::ostream& operator<<(std::ostream &os, const Vec2& v);
+std::ostream& operator<<(std::ostream &os, const Vec3& v);
 std::istream& operator>>(std::istream &is, Vec2& v);
 std::istream& operator>>(std::istream &is, Vec3& v);
 const Vec2 operator*(const Vec2& v, float scalar);
