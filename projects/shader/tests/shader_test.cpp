@@ -29,194 +29,189 @@
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 
+#include "glerrors.h"
+#include "Shader.h"
+
+
+#include "vec.h"
+#include "mat.h"
+
 #define CAPTION "Hello Modern 2D World"
 
 int WinX = 640, WinY = 480;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
-#define VERTICES 0
-#define COLORS 1
+
+GLint VERTICES;
 
 GLuint VaoId, VboId[2];
-GLuint VertexShaderId, FragmentShaderId, ProgramId;
 GLint UniformId;
+GLint colorUniform;
+Shader* shaderProgram;
+
+typedef struct{
+	std::vector<Vec3> vertices;
+	std::vector<GLuint> indices;
+	GLuint VAO;
+	GLuint VBOs[2];
+}shape;
+
+
+/////////////////////////////////////////////////////////////////////// CREATE SHAPES
+
+shape triangle = {.vertices={
+        		Vec3(-0.25f, -0.25f, 0.0f),
+			Vec3( 0.25f, -0.25f, 0.0f),
+			Vec3( 0.00f,  0.25f, 0.0f)},
+      		  .indices={0, 1, 2},
+		  .VAO = 0,
+		  .VBOs = {0, 0}
+};
+shape square = {.vertices={
+			Vec3(-0.25f, -0.25f, 0.0f),
+			Vec3( 0.25f, -0.25f, 0.0f),
+			Vec3( 0.25f,  0.25f, 0.0f),
+			Vec3(-0.25f,  0.25f, 0.0f)},
+		.indices={0, 1, 2, 
+			  2, 3, 0},
+		.VAO = 0,
+		.VBOs = {0, 0}
+};
+shape parallelogram = {.vertices={
+				Vec3(-0.25f, -0.25f, 0.0f),
+				Vec3( 0.00f, -0.25f, 0.0f),
+				Vec3( 0.00f,  0.25f, 0.0f),
+				Vec3( 0.25f,  0.25f, 0.0f)},
+      			.indices={0, 1, 2, 
+				  1, 3, 2},
+			.VAO = 0,
+			.VBOs = {0, 0}
+};
+
+
+std::vector<shape> shapes = {triangle, square, parallelogram};
 
 /////////////////////////////////////////////////////////////////////// ERRORS
 
-bool isOpenGLError() {
-	bool isError = false;
-	GLenum errCode;
-	const GLubyte *errString;
-	while ((errCode = glGetError()) != GL_NO_ERROR) {
-		isError = true;
-		errString = gluErrorString(errCode);
-		std::cerr << "OpenGL ERROR [" << errString << "]." << std::endl;
-	}
-	return isError;
-}
 
-void checkOpenGLError(std::string error)
-{
-	if(isOpenGLError()) {
-		std::cerr << error << std::endl;
-		exit(EXIT_FAILURE);
-	}
-}
-
-/////////////////////////////////////////////////////////////////////// SHADERs
-
-const GLchar* VertexShader =
-{
-	"#version 330 core\n"
-
-	"in vec4 in_Position;\n"
-	"in vec4 in_Color;\n"
-	"out vec4 ex_Color;\n"
-
-	"uniform mat4 Matrix;\n"
-
-	"void main(void)\n"
-	"{\n"
-	"	gl_Position = Matrix * in_Position;\n"
-	"	ex_Color = in_Color;\n"
-	"}\n"
-};
-
-const GLchar* FragmentShader =
-{
-	"#version 330 core\n"
-
-	"in vec4 ex_Color;\n"
-	"out vec4 out_Color;\n"
-
-	"void main(void)\n"
-	"{\n"
-	"	out_Color = ex_Color;\n"
-	"}\n"
-};
 
 void createShaderProgram()
 {
-	VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(VertexShaderId, 1, &VertexShader, 0);
-	glCompileShader(VertexShaderId);
+	shaderProgram = new Shader("res/vertex.shader", "res/fragment.shader");
+	VERTICES = shaderProgram->getAttribLocation("in_Position");
 
-	FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(FragmentShaderId, 1, &FragmentShader, 0);
-	glCompileShader(FragmentShaderId);
-
-	ProgramId = glCreateProgram();
-	glAttachShader(ProgramId, VertexShaderId);
-	glAttachShader(ProgramId, FragmentShaderId);
-
-	glBindAttribLocation(ProgramId, VERTICES, "in_Position");
-	glBindAttribLocation(ProgramId, COLORS, "in_Color");
-	glLinkProgram(ProgramId);
-	UniformId = glGetUniformLocation(ProgramId, "Matrix");
-
+	UniformId = shaderProgram->getUniformLocation("Matrix");
+	colorUniform = shaderProgram->getUniformLocation("color");
+	
 	checkOpenGLError("ERROR: Could not create shaders.");
 }
 
 void destroyShaderProgram()
 {
 	glUseProgram(0);
-	glDetachShader(ProgramId, VertexShaderId);
-	glDetachShader(ProgramId, FragmentShaderId);
-
-	glDeleteShader(FragmentShaderId);
-	glDeleteShader(VertexShaderId);
-	glDeleteProgram(ProgramId);
+	delete shaderProgram;
 
 	checkOpenGLError("ERROR: Could not destroy shaders.");
 }
 
 /////////////////////////////////////////////////////////////////////// VAOs & VBOs
 
-typedef struct 
-{
-	GLfloat XYZW[4];
-	GLfloat RGBA[4];
-} Vertex;
 
-const Vertex Vertices[] = 
-{
-	{{ 0.25f, 0.25f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
-	{{ 0.75f, 0.25f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
-	{{ 0.50f, 0.75f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
-};
-
-const GLubyte Indices[] =
-{
-	0,1,2
-};
-
-void createBufferObjects()
-{
-	glGenVertexArrays(1, &VaoId);
-	glBindVertexArray(VaoId);
-	{
-		glGenBuffers(2, VboId);
-
-		glBindBuffer(GL_ARRAY_BUFFER, VboId[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(VERTICES);
-		glVertexAttribPointer(VERTICES, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-		glEnableVertexAttribArray(COLORS);
-		glVertexAttribPointer(COLORS, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid *)sizeof(Vertices[0].XYZW));
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VboId[1]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+void createBufferObjects(shape& s){
+	
+	
+	//Prepare data
+	GLfloat* vertices;
+	size_t vertex_i = 0;
+	vertices = new GLfloat[s.vertices.size()*4];
+	for(Vec3 vertex : s.vertices){
+		vertices[vertex_i++] = vertex[0];
+		vertices[vertex_i++] = vertex[1];
+		vertices[vertex_i++] = vertex[2];
+		vertices[vertex_i++] = 1.0f;
 	}
+
+	GLuint* indices;
+	size_t index_i = 0;
+	indices = new GLuint[s.indices.size()];
+	for(GLuint index : s.indices){
+		indices[index_i++] = index;
+	}
+
+
+
+	//Upload buffers
+	glGenVertexArrays(1, &s.VAO);
+
+	glBindVertexArray(s.VAO);
+	{
+		glGenBuffers(2, s.VBOs);
+
+		glBindBuffer(GL_ARRAY_BUFFER, s.VBOs[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, NULL, GL_STATIC_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*vertex_i, vertices);
+		
+		glEnableVertexAttribArray(VERTICES);
+		glVertexAttribPointer(VERTICES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, 0);
+
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.VBOs[1]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*index_i, indices, GL_STATIC_DRAW);
+	}
+	
+	delete[] vertices;	
+	delete[] indices;
+	
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 
 	checkOpenGLError("ERROR: Could not create VAOs and VBOs.");
 }
 
 void destroyBufferObjects()
 {
-	glBindVertexArray(VaoId);
-	glDisableVertexAttribArray(VERTICES);
-	glDisableVertexAttribArray(COLORS);
-	glDeleteBuffers(2, VboId);
-	glDeleteVertexArrays(1, &VaoId);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	for(shape s : shapes){
+		glBindVertexArray(s.VAO);
+		glDisableVertexAttribArray(VERTICES);
+		glDeleteBuffers(2, s.VBOs);
+		glDeleteVertexArrays(1, &s.VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
-	checkOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
+		checkOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
+	}
 }
 
 /////////////////////////////////////////////////////////////////////// SCENE
 
-typedef GLfloat Matrix[16];
-
-const Matrix I = {
-	1.0f,  0.0f,  0.0f,  0.0f,
-	0.0f,  1.0f,  0.0f,  0.0f,
-	0.0f,  0.0f,  1.0f,  0.0f,
-	0.0f,  0.0f,  0.0f,  1.0f
-}; // Row Major (GLSL is Column Major)
-
-const Matrix M = {
-	1.0f,  0.0f,  0.0f, -1.0f,
-	0.0f,  1.0f,  0.0f, -1.0f,
-	0.0f,  0.0f,  1.0f,  0.0f,
-	0.0f,  0.0f,  0.0f,  1.0f
-}; // Row Major (GLSL is Column Major)
-
 void drawScene()
 {
-	glBindVertexArray(VaoId);
-	glUseProgram(ProgramId);
+	shaderProgram->use();
 
-	glUniformMatrix4fv(UniformId, 1, GL_TRUE, I);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	CGJM::Mat4 I = CGJM::Mat4(1);
+	CGJM::Mat4 M = CGJM::translate(-0.5f, -0.5f, 0.0f);
+	CGJM::Mat4 M2 = CGJM::translate(-0.75f, -0.75f, 0.0f);
 
-	glUniformMatrix4fv(UniformId, 1, GL_TRUE, M);
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_BYTE, (GLvoid*)0);
+	glBindVertexArray(triangle.VAO);
+	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
+	glUniformMatrix4fv(UniformId, 1, GL_FALSE, M.transpose());
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+
+
+
+	glBindVertexArray(square.VAO);
+	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
+	glUniformMatrix4fv(UniformId, 1, GL_FALSE, I.transpose());
+	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
+	
+	glBindVertexArray(parallelogram.VAO);
+	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
+	glUniformMatrix4fv(UniformId, 1, GL_FALSE, M2.transpose());
+	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -228,8 +223,8 @@ void drawScene()
 
 void cleanup()
 {
-	destroyShaderProgram();
 	destroyBufferObjects();
+	destroyShaderProgram();
 }
 
 void display()
@@ -335,7 +330,9 @@ void init(int argc, char* argv[])
 	setupGLEW();
 	setupOpenGL();
 	createShaderProgram();
-	createBufferObjects();
+	createBufferObjects(triangle);
+	createBufferObjects(square);
+	createBufferObjects(parallelogram);
 	setupCallbacks();
 }
 

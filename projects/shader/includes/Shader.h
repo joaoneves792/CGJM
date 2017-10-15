@@ -15,7 +15,10 @@ public:
 	virtual ~Shader();
 
 	void use();
+	void clean();
 	GLuint getShader();
+	GLint getAttribLocation(const char* name);
+	GLint getUniformLocation(const char* name);
 	void create_program(const char *path_vert_shader, const char *path_frag_shader);
 private:
 	GLuint load_and_compile_shader(const char *fname, GLenum shaderType);

@@ -9,3 +9,5 @@
 !.gitignore
 */build/
 build
+bin
+.vs

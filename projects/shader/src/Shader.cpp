@@ -5,14 +5,23 @@
 #include <fstream>
 
 #include "Shader.h"
-
+#include "glerrors.h"
 
 Shader::Shader(const char* path_vert_shader, const char* path_frag_shader){
 	create_program(path_vert_shader, path_frag_shader);
 }
 
+
+void Shader::clean(){
+	glDetachShader(_shaderProgram, _vertexShader);
+	glDetachShader(_shaderProgram, _fragmentShader);
+	//glDeleteShader(_fragmentShader);
+	//glDeleteShader(_vertexShader);
+	glDeleteProgram(_shaderProgram);
+}
+
 Shader::~Shader(){
-	//TODO Figure out what to place here...
+	clean();
 }
 
 GLuint Shader::getShader(){
@@ -87,16 +96,26 @@ void Shader::create_program(const char *path_vert_shader, const char *path_frag_
         glDeleteShader(_fragmentShader);
 
 
-        glBindAttribLocation(shaderProgram, 0, "position");
+        /*glBindAttribLocation(shaderProgram, 0, "position");
         glBindAttribLocation(shaderProgram, 1, "texture_coord");
         glBindAttribLocation(shaderProgram, 2, "normal");
         glBindAttribLocation(shaderProgram, 3, "jointIndex");
-        glBindAttribLocation(shaderProgram, 4, "jointWeight");
+        glBindAttribLocation(shaderProgram, 4, "jointWeight");*/
         // Link and use the program
         glLinkProgram(shaderProgram);
 
+	checkOpenGLError("Failed to load shaders");
+
         _shaderProgram = shaderProgram;
 	
+}
+
+GLint Shader::getAttribLocation(const char* name){
+	return glGetAttribLocation(_shaderProgram, name);
+}
+
+GLint Shader::getUniformLocation(const char* name){
+	return glGetUniformLocation(_shaderProgram, name);
 }
 
 void Shader::use(){

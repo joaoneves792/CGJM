@@ -143,3 +143,6 @@ const Mat2 Mat2::inverse() const{
 	return Mat2(detInverse*mat[1][1], -detInverse*mat[0][1],
 			-detInverse*mat[1][0], detInverse*mat[0][0]);
 }
+Mat2::operator const float*() const{
+	return (mat)[0];
+}

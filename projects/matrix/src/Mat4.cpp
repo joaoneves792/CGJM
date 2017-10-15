@@ -105,6 +105,9 @@ const float* Mat4::operator[](std::size_t i) const{
 	return (mat)[i];
 }
 
+Mat4::operator const float*() const{
+	return (mat)[0];
+}
 std::ostream& Mat4::write(std::ostream& os) const{
 	return os << "| " << mat[0][0] << " " << mat[0][1] << " " << mat[0][2] << " " << mat[0][3] << " |" << std::endl
 		  << "| " << mat[1][0] << " " << mat[1][1] << " " << mat[1][2] << " " << mat[1][3] << " |" << std::endl

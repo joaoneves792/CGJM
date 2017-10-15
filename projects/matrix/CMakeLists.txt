@@ -27,6 +27,7 @@ set(MAT4_TEST
 add_executable(mat2Test ${SOURCE_FILES} ${HEADER_FILES} ${MAT2_TEST})
 add_executable(mat3Test ${SOURCE_FILES} ${HEADER_FILES} ${MAT3_TEST})
 add_executable(mat4Test ${SOURCE_FILES} ${HEADER_FILES} ${MAT4_TEST})
+add_library(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(mat2Test CGJMvector)
 target_link_libraries(mat3Test CGJMvector)
 target_link_libraries(mat4Test CGJMvector)

@@ -30,6 +30,7 @@ public:
 	const Mat4 operator-(const Mat4& right) const;
 	const Mat4 operator*(const Mat4& right) const;
 	const Vec3 operator*(const Vec3& v) const;
+	operator const float*() const;
 };
 
 class Mat3{
@@ -59,6 +60,7 @@ public:
 	const Mat3 operator-(const Mat3& right) const;
 	const Mat3 operator*(const Mat3& right) const;
 	const Vec3 operator*(const Vec3& v) const;
+	operator const float*() const;
 };
 
 class Mat2{
@@ -88,6 +90,7 @@ public:
 	const Mat2 operator-(const Mat2& right) const;
 	const Mat2 operator*(const Mat2& right) const;
 	const Vec2 operator*(const Vec2& v) const;
+	operator const float*() const;
 };
 
 const Mat4 scale(const float& x, const float& y, const float& z);
