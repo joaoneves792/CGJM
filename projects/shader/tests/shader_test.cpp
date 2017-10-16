@@ -36,9 +36,11 @@
 #include "vec.h"
 #include "mat.h"
 
-#define CAPTION "Hello Modern 2D World"
+#define CAPTION "TANGRAM"
 
-int WinX = 640, WinY = 480;
+#define M_PI 3.14159265359
+
+int WinX = 512, WinY = 512;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
@@ -46,7 +48,7 @@ unsigned int FrameCount = 0;
 GLint VERTICES;
 
 GLuint VaoId, VboId[2];
-GLint UniformId;
+GLint MVPUniform;
 GLint colorUniform;
 Shader* shaderProgram;
 
@@ -60,10 +62,10 @@ typedef struct{
 
 /////////////////////////////////////////////////////////////////////// CREATE SHAPES
 
-shape triangle = {.vertices={
-        		Vec3(-0.25f, -0.25f, 0.0f),
+shape triangle = {.vertices={ 	//Small triangle (others are obtained through scale)
+			Vec3(-0.25f, -0.25f, 0.0f),
 			Vec3( 0.25f, -0.25f, 0.0f),
-			Vec3( 0.00f,  0.25f, 0.0f)},
+			Vec3( 0.25f,  0.25f, 0.0f)},
       		  .indices={0, 1, 2},
 		  .VAO = 0,
 		  .VBOs = {0, 0}
@@ -79,12 +81,12 @@ shape square = {.vertices={
 		.VBOs = {0, 0}
 };
 shape parallelogram = {.vertices={
-				Vec3(-0.25f, -0.25f, 0.0f),
-				Vec3( 0.00f, -0.25f, 0.0f),
-				Vec3( 0.00f,  0.25f, 0.0f),
-				Vec3( 0.25f,  0.25f, 0.0f)},
+                        	Vec3( 0.00f, -0.25f, 0.0f),
+	                        Vec3( 0.50f, -0.25f, 0.0f),
+	                        Vec3( 0.00f,  0.25f, 0.0f),
+        	                Vec3(-0.50f,  0.25f, 0.0f)},
       			.indices={0, 1, 2, 
-				  1, 3, 2},
+				  3, 0, 2},
 			.VAO = 0,
 			.VBOs = {0, 0}
 };
@@ -99,9 +101,10 @@ std::vector<shape> shapes = {triangle, square, parallelogram};
 void createShaderProgram()
 {
 	shaderProgram = new Shader("res/vertex.shader", "res/fragment.shader");
+	
 	VERTICES = shaderProgram->getAttribLocation("in_Position");
 
-	UniformId = shaderProgram->getUniformLocation("Matrix");
+	MVPUniform = shaderProgram->getUniformLocation("Matrix");
 	colorUniform = shaderProgram->getUniformLocation("color");
 	
 	checkOpenGLError("ERROR: Could not create shaders.");
@@ -111,7 +114,6 @@ void destroyShaderProgram()
 {
 	glUseProgram(0);
 	delete shaderProgram;
-
 	checkOpenGLError("ERROR: Could not destroy shaders.");
 }
 
@@ -138,8 +140,6 @@ void createBufferObjects(shape& s){
 	for(GLuint index : s.indices){
 		indices[index_i++] = index;
 	}
-
-
 
 	//Upload buffers
 	glGenVertexArrays(1, &s.VAO);
@@ -192,26 +192,52 @@ void drawScene()
 {
 	shaderProgram->use();
 
-	CGJM::Mat4 I = CGJM::Mat4(1);
-	CGJM::Mat4 M = CGJM::translate(-0.5f, -0.5f, 0.0f);
-	CGJM::Mat4 M2 = CGJM::translate(-0.75f, -0.75f, 0.0f);
+	//View Matrix applied to all objects
+	CGJM::Mat4 V = CGJM::scale(0.75f, 0.75f, 0.0f).transpose();
 
-	glBindVertexArray(triangle.VAO);
-	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
-	glUniformMatrix4fv(UniformId, 1, GL_FALSE, M.transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
-
-
-
+	/*1 square*/
 	glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
-	glUniformMatrix4fv(UniformId, 1, GL_FALSE, I.transpose());
+	CGJM::Mat4 M = CGJM::translate(-0.75f, -0.75f, 0.0f);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
 	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
 	
-	glBindVertexArray(parallelogram.VAO);
+	
+	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
+	glBindVertexArray(triangle.VAO);
+	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
+	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+
 	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
-	glUniformMatrix4fv(UniformId, 1, GL_FALSE, M2.transpose());
+	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.0f); //Medium
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	
+	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
+	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 1.0f);//Big
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	
+	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
+	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 1.0f); //Big
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+
+	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
+	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
+	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	
+
+	/*1 parallelogram*/	
+	glBindVertexArray(parallelogram.VAO);
+	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
+	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*V);
 	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
+
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -250,7 +276,7 @@ void reshape(int w, int h)
 void timer(int value)
 {
 	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << value;
 	std::string s = oss.str();
 	glutSetWindow(WindowHandle);
 	glutSetWindowTitle(s.c_str());
@@ -302,7 +328,7 @@ void setupGLEW()
 		std::cerr << "ERROR glewInit: " << glewGetString(result) << std::endl;
 		exit(EXIT_FAILURE);
 	} 
-	GLenum err_code = glGetError();
+	//GLenum err_code = glGetError();
 }
 
 void setupGLUT(int argc, char* argv[])
