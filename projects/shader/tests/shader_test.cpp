@@ -45,7 +45,7 @@ int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
 
-GLint VERTICES;
+#define VERTICES 0
 
 GLuint VaoId, VboId[2];
 GLint MVPUniform;
@@ -101,8 +101,10 @@ std::vector<shape> shapes = {triangle, square, parallelogram};
 void createShaderProgram()
 {
 	shaderProgram = new Shader("res/vertex.shader", "res/fragment.shader");
-	
-	VERTICES = shaderProgram->getAttribLocation("in_Position");
+
+	shaderProgram->setAttribLocation("in_Position", VERTICES);
+
+	shaderProgram->link();
 
 	MVPUniform = shaderProgram->getUniformLocation("Matrix");
 	colorUniform = shaderProgram->getUniformLocation("color");

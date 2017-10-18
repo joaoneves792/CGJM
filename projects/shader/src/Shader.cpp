@@ -102,12 +102,21 @@ void Shader::create_program(const char *path_vert_shader, const char *path_frag_
         glBindAttribLocation(shaderProgram, 3, "jointIndex");
         glBindAttribLocation(shaderProgram, 4, "jointWeight");*/
         // Link and use the program
-        glLinkProgram(shaderProgram);
+        //glLinkProgram(shaderProgram);
 
 	checkOpenGLError("Failed to load shaders");
 
         _shaderProgram = shaderProgram;
 	
+}
+
+void Shader::link(){
+        glLinkProgram(_shaderProgram);
+	checkOpenGLError("Failed to load shaders");
+}
+
+void Shader::setAttribLocation(const char* name, GLuint position){
+        glBindAttribLocation(_shaderProgram, position, name);
 }
 
 GLint Shader::getAttribLocation(const char* name){
