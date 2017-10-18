@@ -30,3 +30,9 @@ const Mat4 CGJM::translate(const float& x, const float& y, const float& z){
 		    0, 0, 1, z,
 		    0, 0, 0, 1);
 }
+
+const Mat4 lookAt(const Vec3& eye, const Vec3& center, const Vec3& up){
+	
+}
+/*const Mat4 ortho(const float& left, const float& right, const float& top, const float& bottom, const float& near, const float& far);
+const Mat4 perspective(const float& fovy, const float& aspectRatio, const float& near, const float& far);*/

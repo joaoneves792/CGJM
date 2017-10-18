@@ -97,6 +97,10 @@ const Mat4 scale(const float& x, const float& y, const float& z);
 const Mat4 rotate(const Vec3& axis, const float& angle);
 const Mat4 translate(const float& x, const float& y, const float& z);
 const Mat3 dualMatrix(const Vec3& v);
+
+const Mat4 lookAt(const Vec3& eye, const Vec3& center, const Vec3& up);
+const Mat4 ortho(const float& left, const float& right, const float& top, const float& bottom, const float& near, const float& far);
+const Mat4 perspective(const float& fovy, const float& aspectRatio, const float& near, const float& far);
 }
 
 
