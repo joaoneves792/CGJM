@@ -91,6 +91,7 @@ void Shader::create_program(const char *path_vert_shader, const char *path_frag_
         glAttachShader(shaderProgram, _vertexShader);
         glAttachShader(shaderProgram, _fragmentShader);
 
+
         // Flag the shaders for deletion
         glDeleteShader(_vertexShader);
         glDeleteShader(_fragmentShader);
@@ -112,6 +113,23 @@ void Shader::create_program(const char *path_vert_shader, const char *path_frag_
 
 void Shader::link(){
         glLinkProgram(_shaderProgram);
+	GLint isLinked = 0;
+	glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &isLinked);
+        if(!isLinked) {
+
+		GLint maxLength = 0;
+		glGetProgramiv(_shaderProgram, GL_INFO_LOG_LENGTH, &maxLength);
+
+		//The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetProgramInfoLog(_shaderProgram, maxLength, &maxLength, &infoLog[0]);
+
+		//The program is useless now. So delete it.
+		glDeleteProgram(_shaderProgram);
+
+                std::cerr << "Shader link failed with this message:" << std::endl;
+                std::cerr << &infoLog[0] << std::endl;
+        }
 	checkOpenGLError("Failed to load shaders");
 }
 
