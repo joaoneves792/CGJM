@@ -259,9 +259,9 @@ void vec2normalizeTest(){
 	CGJM::Vec2 v2(2, 0);
 	CGJM::Vec2 v3(3, 3);
 
-	v1.normalize();
-	v2.normalize();
-	v3.normalize();
+	v1 = v1.normalize();
+	v2 = v2.normalize();
+	v3 = v3.normalize();
 
 	assertFloat(v1.norm(), 1);
 	assertFloat(v2.norm(), 1);
@@ -569,9 +569,9 @@ void vec3normalizeTest(){
 	CGJM::Vec3 v2(2, 0, 0);
 	CGJM::Vec3 v3(3, 3, 45);
 
-	v1.normalize();
-	v2.normalize();
-	v3.normalize();
+	v1 = v1.normalize();
+	v2 = v2.normalize();
+	v3 = v3.normalize();
 
 	assertFloat(v1.norm(), 1);
 	assertFloat(v2.norm(), 1);

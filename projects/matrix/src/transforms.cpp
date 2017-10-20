@@ -32,7 +32,15 @@ const Mat4 CGJM::translate(const float& x, const float& y, const float& z){
 }
 
 const Mat4 lookAt(const Vec3& eye, const Vec3& center, const Vec3& up){
-	
+	up.normalize();
+	Vec3 v = (center-eye).normalize();
+	Vec3 s = cross(v, up);
+	s = s.normalize();
+	Vec3 u = cross(s, v);
+	return Mat4(s[0],  s[1],  s[2], -dot(s, eye),
+		    u[0],  u[1],  u[2], -dot(u, eye),
+		   -v[0], -v[1], -v[2],  dot(v, eye),
+		       0,     0,     0,           1);
 }
 /*const Mat4 ortho(const float& left, const float& right, const float& top, const float& bottom, const float& near, const float& far);
 const Mat4 perspective(const float& fovy, const float& aspectRatio, const float& near, const float& far);*/

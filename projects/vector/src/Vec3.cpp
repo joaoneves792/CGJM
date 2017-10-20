@@ -26,19 +26,17 @@ Vec3::Vec3(const Vec3& other){
 }
 
 
-float Vec3::quadrance(){
+float Vec3::quadrance()const{
 	return vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
 }
 
-float Vec3::norm(){
+float Vec3::norm()const{
 	return std::sqrt(vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2]);
 }
 
-void Vec3::normalize(){
+const Vec3 Vec3::normalize()const {
 	float length = norm();
-	vec[0] = vec[0]/length;
-	vec[1] = vec[1]/length;
-	vec[2] = vec[2]/length;
+	return Vec3( vec[0]/length, vec[1]/length, vec[2]/length);
 }
 
 

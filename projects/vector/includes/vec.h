@@ -14,9 +14,9 @@ public:
 	std::ostream& write(std::ostream& os) const;
 	std::istream& read(std::istream& is);
 
-	float quadrance();
-	float norm();
-	void normalize();
+	float quadrance()const;
+	float norm() const;
+	const Vec2 normalize() const;
 
 	float& operator[](std::size_t i);
 	float operator[](std::size_t i) const;
@@ -38,9 +38,9 @@ public:
 	std::ostream& write(std::ostream& os) const;
 	std::istream& read(std::istream& is);
 
-	float quadrance();
-	float norm();
-	void normalize();
+	float quadrance()const;
+	float norm() const;
+	const Vec3 normalize() const;
 
 	float& operator[](std::size_t i);
 	float operator[](std::size_t i) const;

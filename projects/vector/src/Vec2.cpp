@@ -23,18 +23,17 @@ Vec2::Vec2(const Vec2& other){
 }
 
 
-float Vec2::quadrance(){
+float Vec2::quadrance()const{
 	return vec[0]*vec[0]+vec[1]*vec[1];
 }
 
-float Vec2::norm(){
+float Vec2::norm() const{
 	return std::sqrt(vec[0]*vec[0]+vec[1]*vec[1]);
 }
 
-void Vec2::normalize(){
+const Vec2 Vec2::normalize() const{
 	float length = norm();
-	vec[0] = vec[0]/length;
-	vec[1] = vec[1]/length;
+	return Vec2(vec[0]/length, vec[1]/length);
 }
 
 
