@@ -100,7 +100,7 @@ Mat4::Mat4(const Mat4& other){
 }
 
 
-const float* Mat4::operator[](std::size_t i) const{
+const float* Mat4::operator[](int i) const{
 	assert(i<4);
 	return (mat)[i];
 }

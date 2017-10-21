@@ -22,7 +22,7 @@ public:
 	const Mat4 inverse() const;
 	float determinant() const;
 
-	const float* operator[](std::size_t i) const;
+	const float* operator[](int i) const;
 	const Mat4 operator=(const Mat4& other);
 	bool operator==(const Mat4& other)const;
 	bool operator!=(const Mat4& other)const;
@@ -52,7 +52,7 @@ public:
 	const Mat3 inverse() const;
 	float determinant() const;
 
-	const float* operator[](std::size_t i) const;
+	const float* operator[](int i) const;
 	const Mat3 operator=(const Mat3& other);
 	bool operator==(const Mat3& other)const;
 	bool operator!=(const Mat3& other)const;
@@ -82,7 +82,7 @@ public:
 	const Mat2 inverse() const;
 	float determinant() const;
 
-	const float* operator[](std::size_t i) const;
+	const float* operator[](int i) const;
 	const Mat2 operator=(const Mat2& other);
 	bool operator==(const Mat2& other)const;
 	bool operator!=(const Mat2& other)const;

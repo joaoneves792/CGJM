@@ -58,7 +58,7 @@ Mat2::Mat2(const Mat4& other){
 }
 
 
-const float* Mat2::operator[](std::size_t i) const{
+const float* Mat2::operator[](int i) const{
 	assert(i<2);
 	return (mat)[i];
 }

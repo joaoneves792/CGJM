@@ -62,33 +62,39 @@ typedef struct{
 
 /////////////////////////////////////////////////////////////////////// CREATE SHAPES
 
-shape triangle = {.vertices={ 	//Small triangle (others are obtained through scale)
+shape triangle = {
+			{//Vertices 	//Small triangle (others are obtained through scale)
 			Vec3(-0.25f, -0.25f, 0.0f),
 			Vec3( 0.25f, -0.25f, 0.0f),
 			Vec3( 0.25f,  0.25f, 0.0f)},
-      		  .indices={0, 1, 2},
-		  .VAO = 0,
-		  .VBOs = {0, 0}
+      		//Indices
+			{0, 1, 2},
+		    0, //VAO
+		    {0, 0}//VBOs
 };
-shape square = {.vertices={
+shape square = {
+			{//Vertices
 			Vec3(-0.25f, -0.25f, 0.0f),
 			Vec3( 0.25f, -0.25f, 0.0f),
 			Vec3( 0.25f,  0.25f, 0.0f),
 			Vec3(-0.25f,  0.25f, 0.0f)},
-		.indices={0, 1, 2, 
+			//indices
+			{0, 1, 2, 
 			  2, 3, 0},
-		.VAO = 0,
-		.VBOs = {0, 0}
+		0, //VAO
+		{0, 0} //VBOs
 };
-shape parallelogram = {.vertices={
+shape parallelogram = {
+						{//Vertices
                         	Vec3( 0.00f, -0.25f, 0.0f),
 	                        Vec3( 0.50f, -0.25f, 0.0f),
 	                        Vec3( 0.00f,  0.25f, 0.0f),
         	                Vec3(-0.50f,  0.25f, 0.0f)},
-      			.indices={0, 1, 2, 
-				  3, 0, 2},
-			.VAO = 0,
-			.VBOs = {0, 0}
+      					//indices
+						{0, 1, 2, 
+						3, 0, 2},
+			0, //VAO
+			{0, 0} //VBOs
 };
 
 

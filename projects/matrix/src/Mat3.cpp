@@ -82,7 +82,7 @@ Mat3::Mat3(const Mat4& other){
 }
 
 
-const float* Mat3::operator[](std::size_t i) const{
+const float* Mat3::operator[](int i) const{
 	assert(i<3);
 	return (mat)[i];
 }
