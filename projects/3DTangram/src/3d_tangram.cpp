@@ -29,6 +29,9 @@ GLint colorUniform;
 Shader* shaderProgram;
 
 CGJM::Vec3 CameraPosition(0, 0, 1);
+CGJM::Vec3 CameraFront(0, 0, -1);
+float CameraYaw = 0;
+float CameraPitch = 0;
 
 CGJM::Mat4 P(1);
 CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
@@ -183,7 +186,7 @@ void drawScene()
 	shaderProgram->use();
 
 
-	CGJM::Mat4 MVP = P*V;
+	CGJM::Mat4 MVP = V*P;
 
 	/*1 square*/
 	glBindVertexArray(square.VAO);
@@ -261,8 +264,8 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	//P = CGJM::perspective(M_PI, WinX / WinY, 0.1, 10);
-	P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
+	P = CGJM::perspective(M_PI/4, WinX / WinY, 0.1, 10);
+	//P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
 }
 
 void timer(int value)
@@ -288,10 +291,22 @@ void mouse(int x, int y) {
 
 	float magicNumber = M_PI / (WinX);
 
-	CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*magicNumber)*CGJM::rotate(Vec3(1, 0, 0), deltaY*magicNumber);
+	CameraYaw += deltaX*magicNumber;
+	CameraPitch += deltaY*magicNumber;
+
+
+	CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
+	CameraFront[1] = std::sin(CameraPitch);
+	CameraFront[2] = std::sin(CameraYaw) * std::cos(CameraPitch);
+
+	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*magicNumber)*CGJM::rotate(Vec3(1, 0, 0), deltaY*magicNumber);
 	CGJM::Mat4 invPos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 	CGJM::Mat4 pos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
-	V = invPos*R*pos*V;
+
+	V = V*invPos*R*pos;*/
+
+	CameraFront = CameraFront.normalize();
+	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
 
 }
 
