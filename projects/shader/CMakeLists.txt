@@ -19,6 +19,8 @@ set(SHADER_TEST
 add_executable(shaderTest ${SOURCE_FILES} ${SHADER_TEST})
 target_link_libraries(shaderTest ${GLEW_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} CGJMvector CGJMmatrix)
 add_dependencies(shaderTest InstallFreeGLUT)
+add_library(${PROJECT_NAME} ${SOURCE_FILES})
+
 
 add_custom_command(TARGET shaderTest POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
