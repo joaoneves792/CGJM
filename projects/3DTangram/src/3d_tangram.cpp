@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cmath>
 
 #include "GL/glew.h"
 #include "GL/freeglut.h"
@@ -14,7 +15,9 @@
 
 #define CAPTION "3D TANGRAM"
 
-#define M_PI 3.14159265359
+#ifndef M_PI
+#define M_PI 3.14159265359f
+#endif
 
 int WinX = 512, WinY = 512;
 int WindowHandle = 0;
@@ -23,15 +26,16 @@ unsigned int FrameCount = 0;
 
 #define VERTICES 0
 
-GLuint VaoId, VboId[2];
 GLint MVPUniform;
 GLint colorUniform;
 Shader* shaderProgram;
 
+unsigned char WASD[4];
 CGJM::Vec3 CameraPosition(0, 0, 1);
-CGJM::Vec3 CameraFront(0, 0, -1);
+
+/*CGJM::Vec3 CameraFront(0, 0, -1);
 float CameraYaw = 0;
-float CameraPitch = 0;
+float CameraPitch = 0;*/
 
 CGJM::Mat4 P(1);
 CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
@@ -186,13 +190,13 @@ void drawScene()
 	shaderProgram->use();
 
 
-	CGJM::Mat4 MVP = V*P;
+	CGJM::Mat4 MVP = P*V;
 
 	/*1 square*/
 	glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
 	CGJM::Mat4 M = CGJM::translate(-0.75f, -0.75f, 0.0f);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	
@@ -200,27 +204,27 @@ void drawScene()
 	glBindVertexArray(triangle.VAO);
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
 	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
 
 	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
 	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.0f); //Medium
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 1.0f);//Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
 	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 1.0f); //Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
 	
 
@@ -228,7 +232,7 @@ void drawScene()
 	glBindVertexArray(parallelogram.VAO);
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
 	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, M.transpose()*MVP);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
 	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
 
 
@@ -254,8 +258,38 @@ void display()
 	glutSwapBuffers();
 }
 
+void update(){
+    static int lastTime = glutGet(GLUT_ELAPSED_TIME);
+
+    int currentTime = glutGet(GLUT_ELAPSED_TIME);
+    int timeDelta = currentTime-lastTime;
+    lastTime = currentTime;
+
+    //Invert Position
+    V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]) * V;
+
+    /*Update camera movement*/
+    float movementRate = 0.005; //magic number
+    if(WASD[0]){
+        CameraPosition[2] += timeDelta*movementRate;
+    }
+    if(WASD[1]){
+        CameraPosition[0] += timeDelta*movementRate;
+    }
+    if(WASD[2]){
+        CameraPosition[2] -= timeDelta*movementRate;
+    }
+    if(WASD[3]){
+        CameraPosition[0] -= timeDelta*movementRate;
+    }
+
+    //Apply new position
+    V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
+}
+
 void idle()
 {
+    update();
 	glutPostRedisplay();
 }
 
@@ -264,6 +298,7 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
+    glutWarpPointer(WinX/2, WinY/2);
 	P = CGJM::perspective(M_PI/4, WinX / WinY, 0.1, 10);
 	//P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
 }
@@ -279,9 +314,55 @@ void timer(int value)
     glutTimerFunc(1000, timer, 0);
 }
 
+void keyboard(unsigned char key, int x, int y){
+    switch(key){
+        case 'w':
+            WASD[0] = key;
+            return;
+        case 'a':
+            WASD[1] = key;
+            return;
+        case 's':
+            WASD[2] = key;
+            return;
+        case 'd':
+            WASD[3] = key;
+            return;
+        default:
+            return;
+    }
+}
+
+void keyboardUp(unsigned char key, int x, int y){
+    switch(key){
+        case 'w':
+            WASD[0] = 0;
+            return;
+        case 'a':
+            WASD[1] = 0;
+            return;
+        case 's':
+            WASD[2] = 0;
+            return;
+        case 'd':
+            WASD[3] = 0;
+            return;
+        default:
+            return;
+    }
+}
+
 void mouse(int x, int y) {
-	static int oldX = 0;
-	static int oldY = 0;
+    static bool firstTime = true;
+    static int oldX = 0;
+    static int oldY = 0;
+
+    if(firstTime){
+        oldX = x;
+        oldY = y;
+        firstTime = false;
+    }
+
 
 	int deltaX = x - oldX;
 	int deltaY = y - oldY;
@@ -289,24 +370,23 @@ void mouse(int x, int y) {
 	oldX = x;
 	oldY = y;
 
-	float magicNumber = M_PI / (WinX);
+	float cameraRate = M_PI / (WinX);
 
-	CameraYaw += deltaX*magicNumber;
-	CameraPitch += deltaY*magicNumber;
+	/*CameraYaw += deltaX*cameraRate;
+	CameraPitch += deltaY*cameraRate;*/
 
 
-	CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
+	/*CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
 	CameraFront[1] = std::sin(CameraPitch);
 	CameraFront[2] = std::sin(CameraYaw) * std::cos(CameraPitch);
+	CameraFront = CameraFront.normalize();
+	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));*/
 
-	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*magicNumber)*CGJM::rotate(Vec3(1, 0, 0), deltaY*magicNumber);
+	CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*cameraRate)*CGJM::rotate(Vec3(1, 0, 0), deltaY*cameraRate);
 	CGJM::Mat4 invPos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 	CGJM::Mat4 pos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
 
-	V = V*invPos*R*pos;*/
-
-	CameraFront = CameraFront.normalize();
-	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
+	V = invPos*R*pos*V;
 
 }
 
@@ -320,6 +400,8 @@ void setupCallbacks()
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0,timer,0);
 	glutPassiveMotionFunc(mouse);
+	glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardUp);
 }
 
 void checkOpenGLInfo()
@@ -388,6 +470,10 @@ void init(int argc, char* argv[])
 	createBufferObjects(parallelogram);
 	setupCallbacks();
 	//V = CGJM::lookAt(CameraPosition, Vec3(0, 0, 0), Vec3(0, 1, 0));
+    WASD[0] = 0;
+    WASD[1] = 0;
+    WASD[2] = 0;
+    WASD[3] = 0;
 }
 
 int main(int argc, char* argv[])

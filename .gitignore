@@ -11,3 +11,5 @@
 build
 bin
 .vs
+.idea
+cmake-build-debug
