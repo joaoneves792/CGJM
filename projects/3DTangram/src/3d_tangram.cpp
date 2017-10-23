@@ -31,14 +31,14 @@ GLint colorUniform;
 Shader* shaderProgram;
 
 unsigned char WASD[4];
-CGJM::Vec3 CameraPosition(0, 0, 1);
-CGJM::Vec3 CameraFront(0, 0, -1);
-CGJM::Vec3 CameraRight(1, 0, 0);
-CGJM::Vec3 CameraUp(0, 1, 0);
+CGJM::Vec3 CameraPosition;
+CGJM::Vec3 CameraFront;
+CGJM::Vec3 CameraRight;
+CGJM::Vec3 CameraUp;
 
 
 CGJM::Mat4 P(1);
-CGJM::Mat4 V;// = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 
 
 typedef struct{
@@ -216,7 +216,7 @@ void drawScene()
 {
 	shaderProgram->use();
 
-    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
+    //V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
 
 	CGJM::Mat4 MVP = P*V;
     CGJM::Mat4 M;
@@ -299,7 +299,7 @@ void update(){
     //Invert Position
     /*Update camera movement*/
 
-    //V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
+    V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
 
     float movementRate = 0.005; //magic number
     if(WASD[0]){
@@ -315,7 +315,7 @@ void update(){
         CameraPosition = CameraPosition + CameraRight*(timeDelta*movementRate);
     }
 
-    //V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2])*V;
+    V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2])*V;
 
 
 }
@@ -397,7 +397,7 @@ void mouse(int x, int y) {
 	CameraPitch += deltaY*cameraRate;
 
 
-    CameraFront[0] = std::cos(CameraPitch) * std::sin(CameraYaw);
+    /*CameraFront[0] = std::cos(CameraPitch) * std::sin(CameraYaw);
 	CameraFront[1] = std::sin(CameraPitch);
 	CameraFront[2] = std::cos(CameraPitch) * std::cos(CameraYaw);
 	CameraFront = CameraFront.normalize();
@@ -408,17 +408,24 @@ void mouse(int x, int y) {
     CameraRight = CameraRight.normalize();
 
     CameraUp = CGJM::cross(CameraRight, CameraFront);
+*/
 
 
+	CGJM::Mat4 R = CGJM::rotate(CameraUp, -(deltaX*cameraRate));
+	CameraFront = (R.inverse()*CameraFront).normalize();
+	CameraRight = (R.inverse()*CameraRight).normalize();
+	R = R*CGJM::rotate(CameraRight, -(deltaY*cameraRate));
+	CameraFront = (R.inverse()*CameraFront).normalize();
+	CameraUp = CGJM::cross(CameraRight, CameraFront).normalize();
 
-	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), -(deltaX*cameraRate))*CGJM::rotate(Vec3(1, 0, 0), -(deltaY*cameraRate));
+
 	CGJM::Mat4 invPos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
 	CGJM::Mat4 pos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 
-    CameraFront = R*CameraFront;
-    CameraRight = R*CameraRight;
 
-	V = invPos*R*pos*V;*/
+	std::cout << CameraRight << CameraFront << CameraUp << std::endl;
+
+	V = invPos*R*pos*V;
 
 }
 
@@ -505,6 +512,10 @@ void init(int argc, char* argv[])
     WASD[1] = 0;
     WASD[2] = 0;
     WASD[3] = 0;
+	CameraPosition = Vec3(0, 0, 1);
+	CameraFront = Vec3(0, 0, -1);
+	CameraRight = Vec3(1, 0, 0);
+	CameraUp = Vec3(0, 1, 0);
 }
 
 int main(int argc, char* argv[])
