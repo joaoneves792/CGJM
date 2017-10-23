@@ -33,9 +33,9 @@ Shader* shaderProgram;
 unsigned char WASD[4];
 CGJM::Vec3 CameraPosition(0, 0, 1);
 
-/*CGJM::Vec3 CameraFront(0, 0, -1);
+CGJM::Vec3 CameraFront(0, 0, -1);
 float CameraYaw = 0;
-float CameraPitch = 0;*/
+float CameraPitch = 0;
 
 CGJM::Mat4 P(1);
 CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
@@ -53,11 +53,38 @@ typedef struct{
 
 shape triangle = {
 			{//Vertices 	//Small triangle (others are obtained through scale)
-			Vec3(-0.25f, -0.25f, 0.0f),
-			Vec3( 0.25f, -0.25f, 0.0f),
-			Vec3( 0.25f,  0.25f, 0.0f)},
+			Vec3(-0.25f, -0.25f, 0.00f), //0
+			Vec3( 0.25f, -0.25f, 0.00f), //1
+			Vec3( 0.25f,  0.25f, 0.00f), //2
+
+            Vec3(-0.25f, -0.25f, 0.25f), //3
+            Vec3( 0.25f, -0.25f, 0.25f), //4
+            Vec3( 0.25f,  0.25f, 0.25f), //5
+
+            Vec3(-0.25f, -0.25f, 0.00f), //6
+            Vec3( 0.25f, -0.25f, 0.00f), //7
+            Vec3( 0.25f, -0.25f, 0.25f), //8
+            Vec3(-0.25f, -0.25f, 0.25f), //9 678896
+
+            Vec3(-0.25f, -0.25f, 0.00f), //10
+            Vec3(-0.25f, -0.25f, 0.25f), //11
+            Vec3( 0.25f,  0.25f, 0.25f), //12
+            Vec3( 0.25f,  0.25f, 0.00f), //13 //10 11 12 12 13 10
+
+            Vec3( 0.25f, -0.25f, 0.00f), //14
+            Vec3( 0.25f,  0.25f, 0.00f), //15
+            Vec3( 0.25f,  0.25f, 0.25f), //16
+            Vec3( 0.25f, -0.25f, 0.25f), //17 //14 15 16 16 17 14
+            },
       		//Indices
-			{0, 1, 2},
+			{2, 1, 0,
+             3, 4, 5,
+             6, 7, 8,
+             8, 9, 6,
+             10, 11, 12,
+             12, 13, 10,
+             14, 15, 16,
+             16, 17, 14},
 		    0, //VAO
 		    {0, 0}//VBOs
 };
@@ -123,7 +150,7 @@ void createBufferObjects(shape& s){
 	//Prepare data
 	GLfloat* vertices;
 	size_t vertex_i = 0;
-	vertices = new GLfloat[s.vertices.size()*4];
+	vertices = new GLfloat[s.indices.size()*4];
 	for(Vec3 vertex : s.vertices){
 		vertices[vertex_i++] = vertex[0];
 		vertices[vertex_i++] = vertex[1];
@@ -191,13 +218,14 @@ void drawScene()
 
 
 	CGJM::Mat4 MVP = P*V;
+    CGJM::Mat4 M;
 
-	/*1 square*/
-	glBindVertexArray(square.VAO);
+    /*1 square*/
+	/*glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
-	CGJM::Mat4 M = CGJM::translate(-0.75f, -0.75f, 0.0f);
+    M = CGJM::translate(-0.75f, -0.75f, 0.0f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)square.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);*/
 	
 	
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
@@ -205,35 +233,36 @@ void drawScene()
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
 	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
+
 
 	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
-	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.0f); //Medium
+	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
-	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 1.0f);//Big
+	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
-	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 1.0f); //Big
+	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, (GLvoid*)0);
-	
+	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
+
 
 	/*1 parallelogram*/	
-	glBindVertexArray(parallelogram.VAO);
+	/*glBindVertexArray(parallelogram.VAO);
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
 	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, 3*2, GL_UNSIGNED_INT, (GLvoid*)0);
+	glDrawElements(GL_TRIANGLES, parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);*/
 
 
 	glUseProgram(0);
@@ -269,6 +298,8 @@ void update(){
     V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]) * V;
 
     /*Update camera movement*/
+    /*TODO Make movement relative to Forward*/
+
     float movementRate = 0.005; //magic number
     if(WASD[0]){
         CameraPosition[2] += timeDelta*movementRate;
@@ -284,7 +315,8 @@ void update(){
     }
 
     //Apply new position
-    V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
+    //V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
+    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
 }
 
 void idle()
@@ -372,21 +404,21 @@ void mouse(int x, int y) {
 
 	float cameraRate = M_PI / (WinX);
 
-	/*CameraYaw += deltaX*cameraRate;
-	CameraPitch += deltaY*cameraRate;*/
+	CameraYaw += deltaX*cameraRate;
+	CameraPitch += deltaY*cameraRate;
 
 
-	/*CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
+	CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
 	CameraFront[1] = std::sin(CameraPitch);
 	CameraFront[2] = std::sin(CameraYaw) * std::cos(CameraPitch);
 	CameraFront = CameraFront.normalize();
-	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));*/
+	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
 
-	CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*cameraRate)*CGJM::rotate(Vec3(1, 0, 0), deltaY*cameraRate);
+	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*cameraRate)*CGJM::rotate(Vec3(1, 0, 0), deltaY*cameraRate);
 	CGJM::Mat4 invPos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 	CGJM::Mat4 pos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
 
-	V = invPos*R*pos*V;
+	V = invPos*R*pos*V;*/
 
 }
 
@@ -469,7 +501,7 @@ void init(int argc, char* argv[])
 	createBufferObjects(square);
 	createBufferObjects(parallelogram);
 	setupCallbacks();
-	//V = CGJM::lookAt(CameraPosition, Vec3(0, 0, 0), Vec3(0, 1, 0));
+    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
     WASD[0] = 0;
     WASD[1] = 0;
     WASD[2] = 0;
