@@ -32,13 +32,13 @@ Shader* shaderProgram;
 
 unsigned char WASD[4];
 CGJM::Vec3 CameraPosition(0, 0, 1);
-
 CGJM::Vec3 CameraFront(0, 0, -1);
-float CameraYaw = 0;
-float CameraPitch = 0;
+CGJM::Vec3 CameraRight(1, 0, 0);
+CGJM::Vec3 CameraUp(0, 1, 0);
+
 
 CGJM::Mat4 P(1);
-CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+CGJM::Mat4 V;// = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
 
 
 typedef struct{
@@ -216,6 +216,7 @@ void drawScene()
 {
 	shaderProgram->use();
 
+    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
 
 	CGJM::Mat4 MVP = P*V;
     CGJM::Mat4 M;
@@ -288,6 +289,7 @@ void display()
 }
 
 void update(){
+    glutWarpPointer(WinX/2, WinY/2);
     static int lastTime = glutGet(GLUT_ELAPSED_TIME);
 
     int currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -295,28 +297,27 @@ void update(){
     lastTime = currentTime;
 
     //Invert Position
-    V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]) * V;
-
     /*Update camera movement*/
-    /*TODO Make movement relative to Forward*/
+
+    //V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
 
     float movementRate = 0.005; //magic number
     if(WASD[0]){
-        CameraPosition[2] += timeDelta*movementRate;
+        CameraPosition = CameraPosition + CameraFront*(timeDelta*movementRate);
     }
     if(WASD[1]){
-        CameraPosition[0] += timeDelta*movementRate;
+        CameraPosition = CameraPosition - CameraRight*(timeDelta*movementRate);
     }
     if(WASD[2]){
-        CameraPosition[2] -= timeDelta*movementRate;
+        CameraPosition = CameraPosition - CameraFront*(timeDelta*movementRate);
     }
     if(WASD[3]){
-        CameraPosition[0] -= timeDelta*movementRate;
+        CameraPosition = CameraPosition + CameraRight*(timeDelta*movementRate);
     }
 
-    //Apply new position
-    //V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
-    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
+    //V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2])*V;
+
+
 }
 
 void idle()
@@ -330,7 +331,6 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-    glutWarpPointer(WinX/2, WinY/2);
 	P = CGJM::perspective(M_PI/4, WinX / WinY, 0.1, 10);
 	//P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
 }
@@ -385,38 +385,38 @@ void keyboardUp(unsigned char key, int x, int y){
 }
 
 void mouse(int x, int y) {
-    static bool firstTime = true;
-    static int oldX = 0;
-    static int oldY = 0;
+    static float CameraYaw = 0;
+    static float CameraPitch = 0;
 
-    if(firstTime){
-        oldX = x;
-        oldY = y;
-        firstTime = false;
-    }
+    int deltaX = (WinX/2) - x;
+	int deltaY = (WinY/2) - y;
 
-
-	int deltaX = x - oldX;
-	int deltaY = y - oldY;
-
-	oldX = x;
-	oldY = y;
-
-	float cameraRate = M_PI / (WinX);
+	float cameraRate = M_PI / (WinX*10);
 
 	CameraYaw += deltaX*cameraRate;
 	CameraPitch += deltaY*cameraRate;
 
 
-	CameraFront[0] = std::cos(CameraYaw) * std::cos(CameraPitch);
+    CameraFront[0] = std::cos(CameraPitch) * std::sin(CameraYaw);
 	CameraFront[1] = std::sin(CameraPitch);
-	CameraFront[2] = std::sin(CameraYaw) * std::cos(CameraPitch);
+	CameraFront[2] = std::cos(CameraPitch) * std::cos(CameraYaw);
 	CameraFront = CameraFront.normalize();
-	V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
 
-	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), deltaX*cameraRate)*CGJM::rotate(Vec3(1, 0, 0), deltaY*cameraRate);
-	CGJM::Mat4 invPos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
-	CGJM::Mat4 pos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
+    CameraRight[0] = std::sin(CameraYaw);
+    CameraRight[1] = 0;
+    CameraRight[0] = std::cos(CameraYaw);
+    CameraRight = CameraRight.normalize();
+
+    CameraUp = CGJM::cross(CameraRight, CameraFront);
+
+
+
+	/*CGJM::Mat4 R = CGJM::rotate(Vec3(0, 1, 0), -(deltaX*cameraRate))*CGJM::rotate(Vec3(1, 0, 0), -(deltaY*cameraRate));
+	CGJM::Mat4 invPos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
+	CGJM::Mat4 pos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
+
+    CameraFront = R*CameraFront;
+    CameraRight = R*CameraRight;
 
 	V = invPos*R*pos*V;*/
 
@@ -501,7 +501,6 @@ void init(int argc, char* argv[])
 	createBufferObjects(square);
 	createBufferObjects(parallelogram);
 	setupCallbacks();
-    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, Vec3(0, 1, 0));
     WASD[0] = 0;
     WASD[1] = 0;
     WASD[2] = 0;
