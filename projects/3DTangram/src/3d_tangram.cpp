@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sstream>
-#include <string>
 #include <cmath>
 
 #include "GL/glew.h"
@@ -13,7 +12,7 @@
 #include "vec.h"
 #include "mat.h"
 
-#define CAPTION "3D TANGRAM"
+#define CAPTION "3D TANGRAM (Press ESC to quit)"
 
 #ifndef M_PI
 #define M_PI 3.14159265359f
@@ -31,16 +30,21 @@ GLint MVPUniform;
 GLint colorUniform;
 Shader* shaderProgram;
 
-unsigned char WASD[4];
+#define W 0
+#define A 1
+#define S 2
+#define D 3
+#define Q 4
+#define E 5
+#define ESCAPE 27
+unsigned char WASD[6];
 CGJM::Vec3 CameraPosition;
 CGJM::Vec3 CameraFront;
 CGJM::Vec3 CameraRight;
 CGJM::Vec3 CameraUp;
 
 
-CGJM::Mat4 P(1);
-CGJM::Mat4 V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
-
+CGJM::Mat4 P; //Projection Matrix
 
 typedef struct{
 	std::vector<Vec3> vertices;
@@ -309,16 +313,16 @@ void drawScene()
 {
 	shaderProgram->use();
 
-    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
+    CGJM::Mat4 V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
 
-	CGJM::Mat4 MVP = P*V;
+	CGJM::Mat4 VP = P*V; //VP part of MVP
     CGJM::Mat4 M;
 
     /*1 square*/
 	glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
     M = CGJM::translate(-0.75f, -0.75f, 0.0f);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)square.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
 
@@ -326,37 +330,37 @@ void drawScene()
 	glBindVertexArray(triangle.VAO);
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
 	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 
 	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
 	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
 	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 
 	/*1 parallelogram*/	
 	glBindVertexArray(parallelogram.VAO);
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
-	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
+	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2.0f);
+	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
+	glDrawElements(GL_TRIANGLES, (GLsizei)parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 
 	glUseProgram(0);
@@ -391,19 +395,24 @@ void update(){
 
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
-    if(WASD[0]){
+    if(WASD[W]){
         CameraPosition = CameraPosition + CameraFront*(timeDelta*movementRate);
     }
-    if(WASD[1]){
+    if(WASD[A]){
         CameraPosition = CameraPosition - CameraRight*(timeDelta*movementRate);
     }
-    if(WASD[2]){
+    if(WASD[S]){
         CameraPosition = CameraPosition - CameraFront*(timeDelta*movementRate);
     }
-    if(WASD[3]){
+    if(WASD[D]){
         CameraPosition = CameraPosition + CameraRight*(timeDelta*movementRate);
     }
 
+    /*Update camera roll*/
+    if(WASD[Q] || WASD[E]) {
+        CameraRight = CameraRight.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
+        CameraUp = CameraUp.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
+    }
 }
 
 void idle()
@@ -418,7 +427,7 @@ void reshape(int w, int h)
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
 	P = CGJM::perspective((float)M_PI/4, WinX / WinY, 0.1, 10);
-	//P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
+	//P = CGJM::ortho(-10, 10, 10, -10, -10, 10);
 }
 
 void timer(int value)
@@ -435,16 +444,25 @@ void timer(int value)
 void keyboard(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[0] = key;
+            WASD[W] = key;
             return;
         case 'a':
-            WASD[1] = key;
+            WASD[A] = key;
             return;
         case 's':
-            WASD[2] = key;
+            WASD[S] = key;
             return;
         case 'd':
-            WASD[3] = key;
+            WASD[D] = key;
+            return;
+        case 'q':
+            WASD[Q] = key;
+            return;
+        case 'e':
+            WASD[E] = key;
+            return;
+        case ESCAPE:
+            glutLeaveMainLoop();
             return;
         default:
             return;
@@ -454,16 +472,22 @@ void keyboard(unsigned char key, int x, int y){
 void keyboardUp(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[0] = 0;
+            WASD[W] = 0;
             return;
         case 'a':
-            WASD[1] = 0;
+            WASD[A] = 0;
             return;
         case 's':
-            WASD[2] = 0;
+            WASD[S] = 0;
             return;
         case 'd':
-            WASD[3] = 0;
+            WASD[D] = 0;
+            return;
+        case 'q':
+            WASD[Q] = 0;
+            return;
+        case 'e':
+            WASD[E] = 0;
             return;
         default:
             return;
@@ -471,19 +495,19 @@ void keyboardUp(unsigned char key, int x, int y){
 }
 
 void mouse(int x, int y) {
+    float cameraRate = (float)(M_PI / (WinX*10.0f));
     int deltaX = (WinX/2) - x;
-	int deltaY = (WinY/2) - y;
-
-	float cameraRate = (float)(M_PI / (WinX*10.0f));
+    int deltaY = (WinY/2) - y;
 
 
-    CameraFront = CameraFront.rotate(CameraUp, (deltaX*cameraRate)).normalize();
-    CameraRight = CameraRight.rotate(CameraUp, (deltaX*cameraRate)).normalize();
-    CameraFront = CameraFront.rotate(CameraRight, (deltaY*cameraRate)).normalize();
+    CameraFront = CameraFront.rotate(CameraUp, (deltaX * cameraRate)).normalize();
+
+    CameraRight = CameraRight.rotate(CameraUp, (deltaX * cameraRate)).normalize();
+
+    CameraFront = CameraFront.rotate(CameraRight, (deltaY * cameraRate)).normalize();
+
     CameraUp = CGJM::cross(CameraRight, CameraFront).normalize();
-
-	//std::cout << CameraRight << CameraFront << CameraUp << std::endl;
-
+    //std::cout << CameraRight << CameraFront << CameraUp << std::endl;
 }
 
 /////////////////////////////////////////////////////////////////////// SETUP
@@ -553,6 +577,7 @@ void setupGLUT(int argc, char* argv[])
 		std::cerr << "ERROR: Could not create a new rendering window." << std::endl;
 		exit(EXIT_FAILURE);
 	}
+    glutSetCursor(GLUT_CURSOR_NONE);
 }
 
 void init(int argc, char* argv[])
@@ -565,10 +590,12 @@ void init(int argc, char* argv[])
 	createBufferObjects(square);
 	createBufferObjects(parallelogram);
 	setupCallbacks();
-    WASD[0] = 0;
-    WASD[1] = 0;
-    WASD[2] = 0;
-    WASD[3] = 0;
+    WASD[W] = 0;
+    WASD[A] = 0;
+    WASD[S] = 0;
+    WASD[D] = 0;
+    WASD[Q] = 0;
+    WASD[E] = 0;
 	CameraPosition = Vec3(0, 0, 4);
 	CameraFront = Vec3(0, 0, -1);
 	CameraRight = Vec3(1, 0, 0);

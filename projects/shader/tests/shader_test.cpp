@@ -38,7 +38,9 @@
 
 #define CAPTION "TANGRAM"
 
-#define M_PI 3.14159265359
+#ifndef M_PI
+#define M_PI 3.14159265359f
+#endif
 
 int WinX = 512, WinY = 512;
 int WindowHandle = 0;
