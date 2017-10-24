@@ -121,3 +121,9 @@ const Vec3 CGJM::cross(const Vec3& v1, const Vec3& v2){
 			v1[2]*v2[0]-v1[0]*v2[2], 
 			v1[0]*v2[1]-v1[1]*v2[0]);
 }
+
+const Vec3 Vec3::rotate(const Vec3& a, const float& t)const{
+    return (*this)*std::cos(t)+
+            CGJM::cross(a,(*this))*std::sin(t)+
+            a*CGJM::dot(a, (*this))*(1-std::cos(t));
+}

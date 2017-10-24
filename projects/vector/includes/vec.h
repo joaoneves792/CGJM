@@ -42,6 +42,8 @@ public:
 	float norm() const;
 	const Vec3 normalize() const;
 
+	const Vec3 rotate(const Vec3& a, const float& t)const ;
+
 	float& operator[](std::size_t i);
 	float operator[](std::size_t i) const;
 	bool operator==(const Vec3& other)const;

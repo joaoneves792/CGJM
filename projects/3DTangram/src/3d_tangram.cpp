@@ -25,6 +25,7 @@ unsigned int FrameCount = 0;
 
 
 #define VERTICES 0
+#define SHADES 1
 
 GLint MVPUniform;
 GLint colorUniform;
@@ -53,28 +54,28 @@ typedef struct{
 
 shape triangle = {
 			{//Vertices 	//Small triangle (others are obtained through scale)
-			Vec3(-0.25f, -0.25f, 0.00f), //0
-			Vec3( 0.25f, -0.25f, 0.00f), //1
-			Vec3( 0.25f,  0.25f, 0.00f), //2
+			Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //0
+			Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //1
+			Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //2
 
-            Vec3(-0.25f, -0.25f, 0.25f), //3
-            Vec3( 0.25f, -0.25f, 0.25f), //4
-            Vec3( 0.25f,  0.25f, 0.25f), //5
+            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //3
+            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //4
+            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //5
 
-            Vec3(-0.25f, -0.25f, 0.00f), //6
-            Vec3( 0.25f, -0.25f, 0.00f), //7
-            Vec3( 0.25f, -0.25f, 0.25f), //8
-            Vec3(-0.25f, -0.25f, 0.25f), //9 678896
+            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //6
+            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //7
+            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.1f, 0.1f, 0.1f), //8
+            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.1f, 0.1f, 0.1f), //9 678896
 
-            Vec3(-0.25f, -0.25f, 0.00f), //10
-            Vec3(-0.25f, -0.25f, 0.25f), //11
-            Vec3( 0.25f,  0.25f, 0.25f), //12
-            Vec3( 0.25f,  0.25f, 0.00f), //13 //10 11 12 12 13 10
+            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //10
+            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.2f, 0.2f, 0.2f), //11
+            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.2f, 0.2f, 0.2f), //12
+            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //13 //10 11 12 12 13 10
 
-            Vec3( 0.25f, -0.25f, 0.00f), //14
-            Vec3( 0.25f,  0.25f, 0.00f), //15
-            Vec3( 0.25f,  0.25f, 0.25f), //16
-            Vec3( 0.25f, -0.25f, 0.25f), //17 //14 15 16 16 17 14
+            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //14
+            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //15
+            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.3f, 0.3f, 0.3f), //16
+            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.3f, 0.3f, 0.3f), //17 //14 15 16 16 17 14
             },
       		//Indices
 			{2, 1, 0,
@@ -90,25 +91,101 @@ shape triangle = {
 };
 shape square = {
 			{//Vertices
-			Vec3(-0.25f, -0.25f, 0.0f),
-			Vec3( 0.25f, -0.25f, 0.0f),
-			Vec3( 0.25f,  0.25f, 0.0f),
-			Vec3(-0.25f,  0.25f, 0.0f)},
+			Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //0
+			Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //1
+			Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //2
+			Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //3
+
+            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //4
+            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //5
+            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //6
+            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //7
+
+            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //8
+            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //9
+            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.1f, 0.1f, 0.1f), //10
+            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.1f, 0.1f, 0.1f), //11
+
+            Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //12
+            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //13
+            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.2f, 0.2f, 0.2f), //14
+            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.2f, 0.2f, 0.2f), //15
+
+            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //16
+            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.3f, 0.3f, 0.3f), //17
+            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.3f, 0.3f, 0.3f), //18
+            Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //19
+
+            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.4f, 0.4f, 0.4f), //20
+            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.4f, 0.4f, 0.4f), //21
+            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.4f, 0.4f, 0.4f), //22
+            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.4f, 0.4f, 0.4f), //23
+
+            },
 			//indices
-			{0, 1, 2, 
-			  2, 3, 0},
+			{2, 1, 0,
+			 0, 3, 2,
+             4, 5, 6,
+             6, 7, 4,
+             8, 9, 10,
+             10, 11, 8,
+             14, 13, 12,
+             12, 15, 14,
+             16, 17, 18,
+             18, 19, 16,
+             22, 21, 20,
+             20, 23, 22
+             },
 		0, //VAO
 		{0, 0} //VBOs
 };
 shape parallelogram = {
 						{//Vertices
-                        	Vec3( 0.00f, -0.25f, 0.0f),
-	                        Vec3( 0.50f, -0.25f, 0.0f),
-	                        Vec3( 0.00f,  0.25f, 0.0f),
-        	                Vec3(-0.50f,  0.25f, 0.0f)},
+                        	Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //0
+	                        Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //1
+	                        Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //2
+        	                Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //3
+
+                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //4
+                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //5
+                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //6
+                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //7
+
+                            Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.1f, 0.1f, 0.1f), //8
+                            Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.1f, 0.1f, 0.1f), //9
+                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.1f, 0.1f, 0.1f), //10
+                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.1f, 0.1f, 0.1f), //11
+
+                            Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.2f, 0.2f, 0.2f), //12
+                            Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.2f, 0.2f, 0.2f), //13
+                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.2f, 0.2f, 0.2f), //14
+                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.2f, 0.2f, 0.2f), //15
+
+                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.3f, 0.3f, 0.3f), //16
+                            Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.3f, 0.3f, 0.3f), //17
+                            Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.3f, 0.3f, 0.3f), //18
+                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.3f, 0.3f, 0.3f), //19
+
+                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.4f, 0.4f, 0.4f), //20
+                            Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.4f, 0.4f, 0.4f), //21
+                            Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.4f, 0.4f, 0.4f), //22
+                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.4f, 0.4f, 0.4f), //23
+
+                        },
       					//indices
-						{0, 1, 2, 
-						3, 0, 2},
+						{2, 1, 0,
+						2, 0, 3,
+                        4, 5, 6,
+                        6, 7, 4,
+                        8, 9, 10,
+                        10, 9, 11,
+                        12, 13, 14,
+                        14, 13, 15,
+                        16, 17, 18,
+                        16, 19, 17,
+                        20, 21, 22,
+                        22, 23, 20
+                        },
 			0, //VAO
 			{0, 0} //VBOs
 };
@@ -125,6 +202,7 @@ void createShaderProgram()
 	shaderProgram = new Shader("res/3DTvertex.shader", "res/3DTfragment.shader");
 
 	shaderProgram->setAttribLocation("in_Position", VERTICES);
+    shaderProgram->setAttribLocation("in_Shade", SHADES);
 
 	shaderProgram->link();
 
@@ -149,13 +227,24 @@ void createBufferObjects(shape& s){
 	
 	//Prepare data
 	GLfloat* vertices;
+    GLfloat* shades;
 	size_t vertex_i = 0;
 	vertices = new GLfloat[s.indices.size()*4];
-	for(Vec3 vertex : s.vertices){
-		vertices[vertex_i++] = vertex[0];
-		vertices[vertex_i++] = vertex[1];
-		vertices[vertex_i++] = vertex[2];
-		vertices[vertex_i++] = 1.0f;
+    shades = new GLfloat[s.indices.size()*4];
+	for(size_t i=0; i<s.vertices.size();/*empty*/){
+        Vec3 vertex = s.vertices[i++];
+        Vec3 shade = s.vertices[i++];
+		vertices[vertex_i] = vertex[0];
+        shades[vertex_i++] = shade[0];
+
+        vertices[vertex_i] = vertex[1];
+        shades[vertex_i++] = shade[1];
+
+        vertices[vertex_i] = vertex[2];
+        shades[vertex_i++] = shade[2];
+
+        vertices[vertex_i] = 1.0f;
+        shades[vertex_i++] = 1.0f;
 	}
 
 	GLuint* indices;
@@ -173,12 +262,15 @@ void createBufferObjects(shape& s){
 		glGenBuffers(2, s.VBOs);
 
 		glBindBuffer(GL_ARRAY_BUFFER, s.VBOs[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, NULL, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i*2, NULL, GL_STATIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*vertex_i, vertices);
-		
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, sizeof(GLfloat)*vertex_i, shades);
+
 		glEnableVertexAttribArray(VERTICES);
 		glVertexAttribPointer(VERTICES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, 0);
 
+        glEnableVertexAttribArray(SHADES);
+        glVertexAttribPointer(SHADES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, (GLvoid *)(sizeof(GLfloat)*vertex_i));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.VBOs[1]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*index_i, indices, GL_STATIC_DRAW);
@@ -200,6 +292,7 @@ void destroyBufferObjects()
 	for(shape s : shapes){
 		glBindVertexArray(s.VAO);
 		glDisableVertexAttribArray(VERTICES);
+        glDisableVertexAttribArray(SHADES);
 		glDeleteBuffers(2, s.VBOs);
 		glDeleteVertexArrays(1, &s.VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -216,19 +309,19 @@ void drawScene()
 {
 	shaderProgram->use();
 
-    //V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
+    V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
 
 	CGJM::Mat4 MVP = P*V;
     CGJM::Mat4 M;
 
     /*1 square*/
-	/*glBindVertexArray(square.VAO);
+	glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
     M = CGJM::translate(-0.75f, -0.75f, 0.0f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)square.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);*/
+	glDrawElements(GL_TRIANGLES, (GLsizei)square.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 	
-	
+
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
 	glBindVertexArray(triangle.VAO);
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
@@ -259,11 +352,11 @@ void drawScene()
 
 
 	/*1 parallelogram*/	
-	/*glBindVertexArray(parallelogram.VAO);
+	glBindVertexArray(parallelogram.VAO);
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
 	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (MVP*M).transpose());
-	glDrawElements(GL_TRIANGLES, parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);*/
+	glDrawElements(GL_TRIANGLES, parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 
 	glUseProgram(0);
@@ -296,11 +389,7 @@ void update(){
     int timeDelta = currentTime-lastTime;
     lastTime = currentTime;
 
-    //Invert Position
     /*Update camera movement*/
-
-    V = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2])*V;
-
     float movementRate = 0.005; //magic number
     if(WASD[0]){
         CameraPosition = CameraPosition + CameraFront*(timeDelta*movementRate);
@@ -315,9 +404,6 @@ void update(){
         CameraPosition = CameraPosition + CameraRight*(timeDelta*movementRate);
     }
 
-    V = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2])*V;
-
-
 }
 
 void idle()
@@ -331,7 +417,7 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	P = CGJM::perspective(M_PI/4, WinX / WinY, 0.1, 10);
+	P = CGJM::perspective((float)M_PI/4, WinX / WinY, 0.1, 10);
 	//P = CGJM::ortho(-1, 1, 1, -1, -1, 1);
 }
 
@@ -385,47 +471,18 @@ void keyboardUp(unsigned char key, int x, int y){
 }
 
 void mouse(int x, int y) {
-    static float CameraYaw = 0;
-    static float CameraPitch = 0;
-
     int deltaX = (WinX/2) - x;
 	int deltaY = (WinY/2) - y;
 
-	float cameraRate = M_PI / (WinX*10);
-
-	CameraYaw += deltaX*cameraRate;
-	CameraPitch += deltaY*cameraRate;
+	float cameraRate = (float)(M_PI / (WinX*10.0f));
 
 
-    /*CameraFront[0] = std::cos(CameraPitch) * std::sin(CameraYaw);
-	CameraFront[1] = std::sin(CameraPitch);
-	CameraFront[2] = std::cos(CameraPitch) * std::cos(CameraYaw);
-	CameraFront = CameraFront.normalize();
+    CameraFront = CameraFront.rotate(CameraUp, (deltaX*cameraRate)).normalize();
+    CameraRight = CameraRight.rotate(CameraUp, (deltaX*cameraRate)).normalize();
+    CameraFront = CameraFront.rotate(CameraRight, (deltaY*cameraRate)).normalize();
+    CameraUp = CGJM::cross(CameraRight, CameraFront).normalize();
 
-    CameraRight[0] = std::sin(CameraYaw);
-    CameraRight[1] = 0;
-    CameraRight[0] = std::cos(CameraYaw);
-    CameraRight = CameraRight.normalize();
-
-    CameraUp = CGJM::cross(CameraRight, CameraFront);
-*/
-
-
-	CGJM::Mat4 R = CGJM::rotate(CameraUp, -(deltaX*cameraRate));
-	CameraFront = (R.inverse()*CameraFront).normalize();
-	CameraRight = (R.inverse()*CameraRight).normalize();
-	R = R*CGJM::rotate(CameraRight, -(deltaY*cameraRate));
-	CameraFront = (R.inverse()*CameraFront).normalize();
-	CameraUp = CGJM::cross(CameraRight, CameraFront).normalize();
-
-
-	CGJM::Mat4 invPos = CGJM::translate(CameraPosition[0], CameraPosition[1], CameraPosition[2]);
-	CGJM::Mat4 pos = CGJM::translate(-CameraPosition[0], -CameraPosition[1], -CameraPosition[2]);
-
-
-	std::cout << CameraRight << CameraFront << CameraUp << std::endl;
-
-	V = invPos*R*pos*V;
+	//std::cout << CameraRight << CameraFront << CameraUp << std::endl;
 
 }
 
@@ -512,7 +569,7 @@ void init(int argc, char* argv[])
     WASD[1] = 0;
     WASD[2] = 0;
     WASD[3] = 0;
-	CameraPosition = Vec3(0, 0, 1);
+	CameraPosition = Vec3(0, 0, 4);
 	CameraFront = Vec3(0, 0, -1);
 	CameraRight = Vec3(1, 0, 0);
 	CameraUp = Vec3(0, 1, 0);
