@@ -43,6 +43,7 @@ CGJM::Vec3 CameraFront;
 CGJM::Vec3 CameraRight;
 CGJM::Vec3 CameraUp;
 
+bool perspectiveProjection = true;
 
 CGJM::Mat4 P; //Projection Matrix
 
@@ -426,8 +427,7 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	P = CGJM::perspective((float)M_PI/4, WinX / WinY, 0.1, 10);
-	//P = CGJM::ortho(-10, 10, 10, -10, -10, 10);
+	P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, -5, 5, -10, 10);
 }
 
 void timer(int value)
@@ -461,6 +461,10 @@ void keyboard(unsigned char key, int x, int y){
         case 'e':
             WASD[E] = key;
             return;
+		case 'p':
+			perspectiveProjection = !perspectiveProjection;
+			P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, -5, 5, -10, 10);
+			return;
         case ESCAPE:
             glutLeaveMainLoop();
             return;
