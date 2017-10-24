@@ -427,13 +427,13 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, -5, 5, -10, 10);
+	P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, 5, -5, 10, -10);
 }
 
 void timer(int value)
 {
 	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << value;
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << ((perspectiveProjection)?" Persp":" Ortho");
 	std::string s = oss.str();
 	glutSetWindow(WindowHandle);
 	glutSetWindowTitle(s.c_str());
@@ -463,7 +463,7 @@ void keyboard(unsigned char key, int x, int y){
             return;
 		case 'p':
 			perspectiveProjection = !perspectiveProjection;
-			P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, -5, 5, -10, 10);
+			P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, 5, -5, 10, -10);
 			return;
         case ESCAPE:
             glutLeaveMainLoop();

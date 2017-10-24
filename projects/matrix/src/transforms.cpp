@@ -45,7 +45,7 @@ const Mat4 CGJM::lookAt(const Vec3& eye, const Vec3& center, const Vec3& up){
 const Mat4 CGJM::ortho(const float& left, const float& right, const float& top, const float& bottom, const float& near, const float& far) {
 	return Mat4(2/(right-left),              0,            0,  (left+right)/(left-right),
 		                      0,2/(top-bottom),            0,  (bottom+top)/(bottom-top),
-					          0,             0, 2/(near-far),      (near+far)/(near-far),
+					          0,             0, 2/(far-near),      (near+far)/(far-near),
 		                      0,             0,            0,                         1);
 }
 
