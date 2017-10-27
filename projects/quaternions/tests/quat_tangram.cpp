@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <quat.h>
 
 #include "GL/glew.h"
 #include "GL/freeglut.h"
@@ -12,7 +13,7 @@
 #include "vec.h"
 #include "mat.h"
 
-#define CAPTION "3D TANGRAM (Press ESC to quit)"
+#define CAPTION "QUAT TANGRAM (Press ESC to quit)"
 
 #ifndef M_PI
 #define M_PI 3.14159265359f
@@ -38,11 +39,13 @@ Shader* shaderProgram;
 #define E 5
 #define ESCAPE 27
 unsigned char WASD[6];
-CGJM::Vec3 CameraPosition;
-CGJM::Vec3 CameraFront;
-CGJM::Vec3 CameraRight;
-CGJM::Vec3 CameraUp;
+float cameraDistance = 5.0f;
+float cameraYaw;
+float cameraRoll;
+float cameraPitch;
 
+
+bool gimbal = false;
 bool perspectiveProjection = true;
 
 CGJM::Mat4 P; //Projection Matrix
@@ -314,7 +317,16 @@ void drawScene()
 {
 	shaderProgram->use();
 
-    CGJM::Mat4 V = CGJM::lookAt(CameraPosition, CameraPosition + CameraFront, CameraUp);
+    CGJM::Mat4 V;
+	if(gimbal){
+		V = CGJM::translate(0.0f, 0.0f, -cameraDistance) *
+				CGJM::rotate(Vec3(1, 0, 0), cameraPitch) *
+				CGJM::rotate(Vec3(0, 1, 0), cameraYaw);
+	}else{
+		V = CGJM::translate(0.0f, 0.0f, -cameraDistance) *
+				(CGJM::Quat(cameraPitch, Vec3(1, 0, 0))*
+				 CGJM::Quat(cameraYaw, Vec3(0, 1, 0))).GLMatrix().transpose();
+	}
 
 	CGJM::Mat4 VP = P*V; //VP part of MVP
     CGJM::Mat4 M;
@@ -397,23 +409,18 @@ void update(){
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
     if(WASD[W]){
-        CameraPosition = CameraPosition + CameraFront*(timeDelta*movementRate);
-    }
-    if(WASD[A]){
-        CameraPosition = CameraPosition - CameraRight*(timeDelta*movementRate);
+		cameraDistance -= (timeDelta*movementRate);
     }
     if(WASD[S]){
-        CameraPosition = CameraPosition - CameraFront*(timeDelta*movementRate);
-    }
-    if(WASD[D]){
-        CameraPosition = CameraPosition + CameraRight*(timeDelta*movementRate);
+		cameraDistance += (timeDelta*movementRate);
     }
 
+
     /*Update camera roll*/
-    if(WASD[Q] || WASD[E]) {
+    /*if(WASD[Q] || WASD[E]) {
         CameraRight = CameraRight.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
         CameraUp = CameraUp.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
-    }
+    }*/
 }
 
 void idle()
@@ -433,7 +440,7 @@ void reshape(int w, int h)
 void timer(int value)
 {
 	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << ((perspectiveProjection)?" Persp":" Ortho");
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << ((perspectiveProjection)?" Persp ":" Ortho ") << "gimbal " << ((gimbal)?"ON":"OFF");
 	std::string s = oss.str();
 	glutSetWindow(WindowHandle);
 	glutSetWindowTitle(s.c_str());
@@ -464,6 +471,9 @@ void keyboard(unsigned char key, int x, int y){
 		case 'p':
 			perspectiveProjection = !perspectiveProjection;
 			P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, 5, -5, 10, -10);
+			return;
+		case 'g':
+			gimbal = !gimbal;
 			return;
         case ESCAPE:
             glutLeaveMainLoop();
@@ -503,15 +513,9 @@ void mouse(int x, int y) {
     int deltaX = (WinX/2) - x;
     int deltaY = (WinY/2) - y;
 
+	cameraYaw += deltaX*cameraRate;
+	cameraPitch += deltaY*cameraRate;
 
-    CameraFront = CameraFront.rotate(CameraUp, (deltaX * cameraRate)).normalize();
-
-    CameraRight = CameraRight.rotate(CameraUp, (deltaX * cameraRate)).normalize();
-
-    CameraFront = CameraFront.rotate(CameraRight, (deltaY * cameraRate)).normalize();
-
-    CameraUp = CGJM::cross(CameraRight, CameraFront).normalize();
-    //std::cout << CameraRight << CameraFront << CameraUp << std::endl;
 }
 
 /////////////////////////////////////////////////////////////////////// SETUP
@@ -600,10 +604,6 @@ void init(int argc, char* argv[])
     WASD[D] = 0;
     WASD[Q] = 0;
     WASD[E] = 0;
-	CameraPosition = Vec3(0, 0, 4);
-	CameraFront = Vec3(0, 0, -1);
-	CameraRight = Vec3(1, 0, 0);
-	CameraUp = Vec3(0, 1, 0);
 }
 
 int main(int argc, char* argv[])
