@@ -44,9 +44,9 @@ float cameraYaw = 0.0f;
 float cameraRoll = 0.0f;
 float cameraPitch = 0.0f;
 
-Vec3 front(0, 0 ,-1);
-Vec3 up(0, 1, 0);
-Vec3 right(1, 0, 0);
+const Vec3 front(0, 0 ,-1);
+const Vec3 up(0, 1, 0);
+const Vec3 right(1, 0, 0);
 
 Quat cameraOrientation(0, up);
 
@@ -327,19 +327,13 @@ void drawScene()
     CGJM::Mat4 V;
 	if(gimbal){
 		//order XYZ
-		Vec3 rotatedUp = Vec3(0,1,0).rotate(Vec3(1, 0, 0), cameraPitch);
-		Vec3 rotatedFront = Vec3(0, 0, -1).rotate(Vec3(1, 0, 0), cameraPitch).rotate(rotatedUp, cameraYaw);
-		R = CGJM::rotate(rotatedFront, cameraRoll) *
-				 CGJM::rotate(rotatedUp, cameraYaw) *
-				 CGJM::rotate(Vec3(1, 0, 0), cameraPitch);
+		R = CGJM::rotate(front, cameraRoll) *
+				 CGJM::rotate(up, cameraYaw) *
+				 CGJM::rotate(right, cameraPitch);
 
 	}else{
 		R = cameraOrientation.GLMatrix().transpose();
 	}
-
-	up = (R * Vec3(0, 1, 0)).normalize();
-	front = (R * Vec3(0, 0, -1)).normalize();
-	right = (R * Vec3(1, 0, 0)).normalize();
 
 	V = CGJM::translate(0.0f, 0.0f, -cameraDistance) * R;
 
