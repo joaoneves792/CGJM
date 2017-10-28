@@ -120,7 +120,11 @@ const Mat4 Quat::GLMatrix() const {
 }
 
 const Quat Quat::operator=(const Quat &other) {
-    return Quat(other.t, other.x, other.y, other.z);
+    t = other.t;
+    x = other.x;
+    y = other.y;
+    z = other.z;
+    return *this;
 }
 
 bool Quat::operator==(const Quat &other) const {

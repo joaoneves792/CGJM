@@ -40,9 +40,15 @@ Shader* shaderProgram;
 #define ESCAPE 27
 unsigned char WASD[6];
 float cameraDistance = 5.0f;
-float cameraYaw;
-float cameraRoll;
-float cameraPitch;
+float cameraYaw = 0.0f;
+float cameraRoll = 0.0f;
+float cameraPitch = 0.0f;
+
+Vec3 front(0, 0 ,-1);
+Vec3 up(0, 1, 0);
+Vec3 right(1, 0, 0);
+
+Quat cameraOrientation(0, up);
 
 
 bool gimbal = false;
@@ -317,16 +323,25 @@ void drawScene()
 {
 	shaderProgram->use();
 
+	CGJM::Mat4 R;
     CGJM::Mat4 V;
 	if(gimbal){
-		V = CGJM::translate(0.0f, 0.0f, -cameraDistance) *
-				CGJM::rotate(Vec3(1, 0, 0), cameraPitch) *
-				CGJM::rotate(Vec3(0, 1, 0), cameraYaw);
+		//order XYZ
+		Vec3 rotatedUp = Vec3(0,1,0).rotate(Vec3(1, 0, 0), cameraPitch);
+		Vec3 rotatedFront = Vec3(0, 0, -1).rotate(Vec3(1, 0, 0), cameraPitch).rotate(rotatedUp, cameraYaw);
+		R = CGJM::rotate(rotatedFront, cameraRoll) *
+				 CGJM::rotate(rotatedUp, cameraYaw) *
+				 CGJM::rotate(Vec3(1, 0, 0), cameraPitch);
+
 	}else{
-		V = CGJM::translate(0.0f, 0.0f, -cameraDistance) *
-				(CGJM::Quat(cameraPitch, Vec3(1, 0, 0))*
-				 CGJM::Quat(cameraYaw, Vec3(0, 1, 0))).GLMatrix().transpose();
+		R = cameraOrientation.GLMatrix().transpose();
 	}
+
+	up = (R * Vec3(0, 1, 0)).normalize();
+	front = (R * Vec3(0, 0, -1)).normalize();
+	right = (R * Vec3(1, 0, 0)).normalize();
+
+	V = CGJM::translate(0.0f, 0.0f, -cameraDistance) * R;
 
 	CGJM::Mat4 VP = P*V; //VP part of MVP
     CGJM::Mat4 M;
@@ -417,10 +432,10 @@ void update(){
 
 
     /*Update camera roll*/
-    /*if(WASD[Q] || WASD[E]) {
-        CameraRight = CameraRight.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
-        CameraUp = CameraUp.rotate(CameraFront, ( (WASD[Q])?-1:1)*(timeDelta*movementRate)).normalize();
-    }*/
+    if(WASD[Q] || WASD[E]) {
+        cameraRoll += ((WASD[Q])?-1:1)*(timeDelta*movementRate);
+		cameraOrientation = Quat(((WASD[Q])?-1:1)*(timeDelta*movementRate), front) * cameraOrientation;
+    }
 }
 
 void idle()
@@ -509,12 +524,17 @@ void keyboardUp(unsigned char key, int x, int y){
 }
 
 void mouse(int x, int y) {
-    float cameraRate = (float)(M_PI / (WinX*10.0f));
+    float cameraRate = (float)-1.0f*(M_PI / (WinX*10.0f));
     int deltaX = (WinX/2) - x;
     int deltaY = (WinY/2) - y;
 
 	cameraYaw += deltaX*cameraRate;
 	cameraPitch += deltaY*cameraRate;
+
+	Quat pitchQuat = Quat(deltaY*cameraRate, right);
+	Quat yawQuat = Quat(deltaX*cameraRate, up);
+
+	cameraOrientation = pitchQuat * yawQuat * cameraOrientation;
 
 }
 
