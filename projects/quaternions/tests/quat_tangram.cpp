@@ -39,6 +39,8 @@ Shader* shaderProgram;
 #define E 5
 #define ESCAPE 27
 unsigned char WASD[6];
+int mouseX = WinX/2;
+int mouseY = WinY/2;
 float cameraDistance = 5.0f;
 float cameraYaw = 0.0f;
 float cameraRoll = 0.0f;
@@ -408,7 +410,6 @@ void display()
 }
 
 void update(){
-    glutWarpPointer(WinX/2, WinY/2);
     static int lastTime = glutGet(GLUT_ELAPSED_TIME);
 
     int currentTime = glutGet(GLUT_ELAPSED_TIME);
@@ -430,6 +431,7 @@ void update(){
         cameraRoll += ((WASD[Q])?-1:1)*(timeDelta*movementRate);
 		cameraOrientation = Quat(((WASD[Q])?-1:1)*(timeDelta*movementRate), front) * cameraOrientation;
     }
+    
 }
 
 void idle()
@@ -455,6 +457,27 @@ void timer(int value)
 	glutSetWindowTitle(s.c_str());
     FrameCount = 0;
     glutTimerFunc(1000, timer, 0);
+}
+
+void mouseTimer(int value)
+{
+	//Wthis is executed every 10ms, necessary since the values vary a alot between Win and linux
+
+	float cameraRate = (float)-1.0f*(M_PI / (WinX*2));
+    int deltaX = (WinX/2) - mouseX;
+    int deltaY = (WinY/2) - mouseY;
+	glutWarpPointer(WinX/2, WinY/2);
+	mouseX = WinX / 2;
+	mouseY = WinY / 2;
+	
+	cameraYaw += deltaX*cameraRate;
+	cameraPitch += deltaY*cameraRate;
+
+	Quat pitchQuat = Quat(deltaY*cameraRate, right);
+	Quat yawQuat = Quat(deltaX*cameraRate, up);
+
+	cameraOrientation = pitchQuat * yawQuat * cameraOrientation;
+    glutTimerFunc(10, mouseTimer, 0);
 }
 
 void keyboard(unsigned char key, int x, int y){
@@ -518,18 +541,8 @@ void keyboardUp(unsigned char key, int x, int y){
 }
 
 void mouse(int x, int y) {
-    float cameraRate = (float)-1.0f*(M_PI / (WinX*10.0f));
-    int deltaX = (WinX/2) - x;
-    int deltaY = (WinY/2) - y;
-
-	cameraYaw += deltaX*cameraRate;
-	cameraPitch += deltaY*cameraRate;
-
-	Quat pitchQuat = Quat(deltaY*cameraRate, right);
-	Quat yawQuat = Quat(deltaX*cameraRate, up);
-
-	cameraOrientation = pitchQuat * yawQuat * cameraOrientation;
-
+	mouseX = x;
+	mouseY = y;
 }
 
 /////////////////////////////////////////////////////////////////////// SETUP
@@ -541,6 +554,7 @@ void setupCallbacks()
 	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0,timer,0);
+	glutTimerFunc(0,mouseTimer,0);
 	glutPassiveMotionFunc(mouse);
 	glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
