@@ -1,9 +1,9 @@
 #version 330 core
 
 in vec4 in_Position;
-in vec4 in_Shade;
+in float in_Shade;
 
-out vec4 shade;
+out float shade;
 
 uniform mat4 MVP;
 

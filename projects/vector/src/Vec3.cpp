@@ -25,6 +25,11 @@ Vec3::Vec3(const Vec3& other){
 	vec[2]=other[2];
 }
 
+Vec3::Vec3(const Vec4& other){
+	vec[0]=other[0];
+	vec[1]=other[1];
+	vec[2]=other[2];
+}
 
 float Vec3::quadrance()const{
 	return vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];

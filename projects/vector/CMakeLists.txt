@@ -12,7 +12,8 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
   src/Vec2.cpp
-  src/Vec3.cpp)
+  src/Vec3.cpp
+  src/Vec4.cpp)
 
 set(TEST_FILES tests/vecTest.cpp)
 

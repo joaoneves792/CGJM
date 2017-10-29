@@ -19,7 +19,7 @@
 #define M_PI 3.14159265359f
 #endif
 
-int WinX = 512, WinY = 512;
+int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
@@ -59,7 +59,7 @@ bool perspectiveProjection = true;
 CGJM::Mat4 P; //Projection Matrix
 
 typedef struct{
-	std::vector<Vec3> vertices;
+	std::vector<Vec4> vertices;
 	std::vector<GLuint> indices;
 	GLuint VAO;
 	GLuint VBOs[2];
@@ -70,28 +70,28 @@ typedef struct{
 
 shape triangle = {
 			{//Vertices 	//Small triangle (others are obtained through scale)
-			Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //0
-			Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //1
-			Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //2
+			Vec4(-0.25f, -0.25f, 0.00f, 1.00f), //0
+			Vec4( 0.25f, -0.25f, 0.00f, 1.00f), //1
+			Vec4( 0.25f,  0.25f, 0.00f, 1.00f), //2
 
-            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //3
-            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //4
-            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.0f, 0.0f, 0.0f), //5
+            Vec4(-0.25f, -0.25f, 0.25f, 0.80f), //3
+            Vec4( 0.25f, -0.25f, 0.25f, 0.80f), //4
+            Vec4( 0.25f,  0.25f, 0.25f, 0.80f), //5
 
-            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //6
-            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //7
-            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.1f, 0.1f, 0.1f), //8
-            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.1f, 0.1f, 0.1f), //9 678896
+            Vec4(-0.25f, -0.25f, 0.00f, 0.85f), //6
+            Vec4( 0.25f, -0.25f, 0.00f, 0.85f), //7
+            Vec4( 0.25f, -0.25f, 0.25f, 0.85f), //8
+            Vec4(-0.25f, -0.25f, 0.25f, 0.85f), //9 678896
 
-            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //10
-            Vec3(-0.25f, -0.25f, 0.25f), Vec3(0.2f, 0.2f, 0.2f), //11
-            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.2f, 0.2f, 0.2f), //12
-            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //13 //10 11 12 12 13 10
+            Vec4(-0.25f, -0.25f, 0.00f, 0.90f), //10
+            Vec4(-0.25f, -0.25f, 0.25f, 0.90f), //11
+            Vec4( 0.25f,  0.25f, 0.25f, 0.90f), //12
+            Vec4( 0.25f,  0.25f, 0.00f, 0.90f), //13 //10 11 12 12 13 10
 
-            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //14
-            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //15
-            Vec3( 0.25f,  0.25f, 0.25f), Vec3(0.3f, 0.3f, 0.3f), //16
-            Vec3( 0.25f, -0.25f, 0.25f), Vec3(0.3f, 0.3f, 0.3f), //17 //14 15 16 16 17 14
+            Vec4( 0.25f, -0.25f, 0.00f, 0.95f), //14
+            Vec4( 0.25f,  0.25f, 0.00f, 0.95f), //15
+            Vec4( 0.25f,  0.25f, 0.25f, 0.95f), //16
+            Vec4( 0.25f, -0.25f, 0.25f, 0.95f), //17 //14 15 16 16 17 14
             },
       		//Indices
 			{2, 1, 0,
@@ -107,35 +107,35 @@ shape triangle = {
 };
 shape square = {
 			{//Vertices
-			Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //0
-			Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //1
-			Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //2
-			Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.5f, 0.5f, 0.5f), //3
+			Vec4(-0.25f, -0.25f, 0.00f, 1.0f), //0
+			Vec4( 0.25f, -0.25f, 0.00f, 1.0f), //1
+			Vec4( 0.25f,  0.25f, 0.00f, 1.0f), //2
+			Vec4(-0.25f,  0.25f, 0.00f, 1.0f), //3
 
-            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //4
-            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //5
-            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //6
-            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.0f, 0.0f, 0.0f), //7
+            Vec4(-0.25f, -0.25f, 0.75f, 0.75f), //4
+            Vec4( 0.25f, -0.25f, 0.75f, 0.75f), //5
+            Vec4( 0.25f,  0.25f, 0.75f, 0.75f), //6
+            Vec4(-0.25f,  0.25f, 0.75f, 0.75f), //7
 
-            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //8
-            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.1f, 0.1f, 0.1f), //9
-            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.1f, 0.1f, 0.1f), //10
-            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.1f, 0.1f, 0.1f), //11
+            Vec4(-0.25f, -0.25f, 0.00f, 0.80f), //8
+            Vec4( 0.25f, -0.25f, 0.00f, 0.80f), //9
+            Vec4( 0.25f, -0.25f, 0.75f, 0.80f), //10
+            Vec4(-0.25f, -0.25f, 0.75f, 0.80f), //11
 
-            Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //12
-            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.2f, 0.2f, 0.2f), //13
-            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.2f, 0.2f, 0.2f), //14
-            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.2f, 0.2f, 0.2f), //15
+            Vec4(-0.25f,  0.25f, 0.00f, 0.85f), //12
+            Vec4( 0.25f,  0.25f, 0.00f, 0.85f), //13
+            Vec4( 0.25f,  0.25f, 0.75f, 0.85f), //14
+            Vec4(-0.25f,  0.25f, 0.75f, 0.85f), //15
 
-            Vec3(-0.25f, -0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //16
-            Vec3(-0.25f, -0.25f, 0.75f), Vec3(0.3f, 0.3f, 0.3f), //17
-            Vec3(-0.25f,  0.25f, 0.75f), Vec3(0.3f, 0.3f, 0.3f), //18
-            Vec3(-0.25f,  0.25f, 0.00f), Vec3(0.3f, 0.3f, 0.3f), //19
+            Vec4(-0.25f, -0.25f, 0.00f, 0.90f), //16
+            Vec4(-0.25f, -0.25f, 0.75f, 0.90f), //17
+            Vec4(-0.25f,  0.25f, 0.75f, 0.90f), //18
+            Vec4(-0.25f,  0.25f, 0.00f, 0.90f), //19
 
-            Vec3( 0.25f, -0.25f, 0.00f), Vec3(0.4f, 0.4f, 0.4f), //20
-            Vec3( 0.25f, -0.25f, 0.75f), Vec3(0.4f, 0.4f, 0.4f), //21
-            Vec3( 0.25f,  0.25f, 0.75f), Vec3(0.4f, 0.4f, 0.4f), //22
-            Vec3( 0.25f,  0.25f, 0.00f), Vec3(0.4f, 0.4f, 0.4f), //23
+            Vec4( 0.25f, -0.25f, 0.00f, 0.95f), //20
+            Vec4( 0.25f, -0.25f, 0.75f, 0.95f), //21
+            Vec4( 0.25f,  0.25f, 0.75f, 0.95f), //22
+            Vec4( 0.25f,  0.25f, 0.00f, 0.95f), //23
 
             },
 			//indices
@@ -157,35 +157,35 @@ shape square = {
 };
 shape parallelogram = {
 						{//Vertices
-                        	Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //0
-	                        Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //1
-	                        Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //2
-        	                Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.5f, 0.5f, 0.5f), //3
+                        	Vec4( 0.00f, -0.25f, 0.0f, 1.0f), //0
+	                        Vec4( 0.50f, -0.25f, 0.0f, 1.0f), //1
+	                        Vec4( 0.00f,  0.25f, 0.0f, 1.0f), //2
+        	                Vec4(-0.50f,  0.25f, 0.0f, 1.0f), //3
 
-                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //4
-                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //5
-                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //6
-                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.0f, 0.0f, 0.0f), //7
+                            Vec4( 0.00f, -0.25f, 1.0f, 0.75f), //4
+                            Vec4( 0.50f, -0.25f, 1.0f, 0.75f), //5
+                            Vec4( 0.00f,  0.25f, 1.0f, 0.75f), //6
+                            Vec4(-0.50f,  0.25f, 1.0f, 0.75f), //7
 
-                            Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.1f, 0.1f, 0.1f), //8
-                            Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.1f, 0.1f, 0.1f), //9
-                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.1f, 0.1f, 0.1f), //10
-                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.1f, 0.1f, 0.1f), //11
+                            Vec4( 0.00f, -0.25f, 0.0f, 0.80f), //8
+                            Vec4( 0.50f, -0.25f, 0.0f, 0.80f), //9
+                            Vec4( 0.00f, -0.25f, 1.0f, 0.80f), //10
+                            Vec4( 0.50f, -0.25f, 1.0f, 0.80f), //11
 
-                            Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.2f, 0.2f, 0.2f), //12
-                            Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.2f, 0.2f, 0.2f), //13
-                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.2f, 0.2f, 0.2f), //14
-                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.2f, 0.2f, 0.2f), //15
+                            Vec4( 0.00f,  0.25f, 0.0f, 0.85f), //12
+                            Vec4(-0.50f,  0.25f, 0.0f, 0.85f), //13
+                            Vec4( 0.00f,  0.25f, 1.0f, 0.85f), //14
+                            Vec4(-0.50f,  0.25f, 1.0f, 0.85f), //15
 
-                            Vec3( 0.00f, -0.25f, 1.0f), Vec3(0.3f, 0.3f, 0.3f), //16
-                            Vec3(-0.50f,  0.25f, 0.0f), Vec3(0.3f, 0.3f, 0.3f), //17
-                            Vec3( 0.00f, -0.25f, 0.0f), Vec3(0.3f, 0.3f, 0.3f), //18
-                            Vec3(-0.50f,  0.25f, 1.0f), Vec3(0.3f, 0.3f, 0.3f), //19
+                            Vec4( 0.00f, -0.25f, 1.0f, 0.90f), //16
+                            Vec4(-0.50f,  0.25f, 0.0f, 0.90f), //17
+                            Vec4( 0.00f, -0.25f, 0.0f, 0.90f), //18
+                            Vec4(-0.50f,  0.25f, 1.0f, 0.90f), //19
 
-                            Vec3( 0.50f, -0.25f, 1.0f), Vec3(0.4f, 0.4f, 0.4f), //20
-                            Vec3( 0.50f, -0.25f, 0.0f), Vec3(0.4f, 0.4f, 0.4f), //21
-                            Vec3( 0.00f,  0.25f, 0.0f), Vec3(0.4f, 0.4f, 0.4f), //22
-                            Vec3( 0.00f,  0.25f, 1.0f), Vec3(0.4f, 0.4f, 0.4f), //23
+                            Vec4( 0.50f, -0.25f, 1.0f, 0.95f), //20
+                            Vec4( 0.50f, -0.25f, 0.0f, 0.95f), //21
+                            Vec4( 0.00f,  0.25f, 0.0f, 0.95f), //22
+                            Vec4( 0.00f,  0.25f, 1.0f, 0.95f), //23
 
                         },
       					//indices
@@ -246,21 +246,15 @@ void createBufferObjects(shape& s){
     GLfloat* shades;
 	size_t vertex_i = 0;
 	vertices = new GLfloat[s.indices.size()*4];
-    shades = new GLfloat[s.indices.size()*4];
+    shades = new GLfloat[s.indices.size()];
 	for(size_t i=0; i<s.vertices.size();/*empty*/){
-        Vec3 vertex = s.vertices[i++];
-        Vec3 shade = s.vertices[i++];
-		vertices[vertex_i] = vertex[0];
-        shades[vertex_i++] = shade[0];
+        Vec4 vertex = s.vertices[i];
+		vertices[vertex_i++] = vertex[0];
+        vertices[vertex_i++] = vertex[1];
+        vertices[vertex_i++] = vertex[2];
+        vertices[vertex_i++] = 1.0f;
 
-        vertices[vertex_i] = vertex[1];
-        shades[vertex_i++] = shade[1];
-
-        vertices[vertex_i] = vertex[2];
-        shades[vertex_i++] = shade[2];
-
-        vertices[vertex_i] = 1.0f;
-        shades[vertex_i++] = 1.0f;
+		shades[i++] = vertex[3];
 	}
 
 	GLuint* indices;
@@ -278,15 +272,15 @@ void createBufferObjects(shape& s){
 		glGenBuffers(2, s.VBOs);
 
 		glBindBuffer(GL_ARRAY_BUFFER, s.VBOs[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i*2, NULL, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i+sizeof(GLfloat)*index_i, NULL, GL_STATIC_DRAW);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*vertex_i, vertices);
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, sizeof(GLfloat)*vertex_i, shades);
+        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, sizeof(GLfloat)*index_i, shades);
 
 		glEnableVertexAttribArray(VERTICES);
 		glVertexAttribPointer(VERTICES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, 0);
 
         glEnableVertexAttribArray(SHADES);
-        glVertexAttribPointer(SHADES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, (GLvoid *)(sizeof(GLfloat)*vertex_i));
+        glVertexAttribPointer(SHADES, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (GLvoid *)(sizeof(GLfloat)*vertex_i));
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.VBOs[1]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*index_i, indices, GL_STATIC_DRAW);
@@ -358,7 +352,7 @@ void drawScene()
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
 
 
-	glUniform4f(colorUniform, 0.0f, 0.0f, 0.5f, 1.0f);
+	glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
 	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
