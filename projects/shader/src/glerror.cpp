@@ -1,7 +1,7 @@
 #include <GL/glew.h>
 #include <string>
 #include <iostream>
-#include "GL/freeglut.h"
+#include "GL/glut.h"
 #include "glerrors.h"
 
 bool isOpenGLError() {
