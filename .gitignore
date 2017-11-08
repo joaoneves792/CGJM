@@ -5,11 +5,10 @@
 *CMakeCache.txt
 *Makefile
 *CMakeFiles
-*/bin/*
 !.gitignore
 */build/
-build
-bin
+/build
+/bin/*
 .vs
 .idea
 cmake-build-debug
