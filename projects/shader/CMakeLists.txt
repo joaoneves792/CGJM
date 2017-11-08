@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.0)
+cmake_minimum_required(VERSION 3.2.2)
 project(CGJMshader CXX)
 
 include_directories(
