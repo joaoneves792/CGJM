@@ -64,160 +64,8 @@ CGJM::Mat4 P; //Projection Matrix
 
 OBJMesh* cube;
 OBJMesh* triangle;
-
-typedef struct{
-	std::vector<Vec4> vertices;
-	std::vector<GLuint> indices;
-	GLuint VAO;
-	GLuint VBOs[2];
-}shape;
-
-
-/////////////////////////////////////////////////////////////////////// CREATE SHAPES
-/*
-shape triangle = {
-			{//Vertices 	//Small triangle (others are obtained through scale)
-			Vec4(-0.25f, -0.25f, 0.00f, 1.00f), //0
-			Vec4( 0.25f, -0.25f, 0.00f, 1.00f), //1
-			Vec4( 0.25f,  0.25f, 0.00f, 1.00f), //2
-
-            Vec4(-0.25f, -0.25f, 0.25f, 0.80f), //3
-            Vec4( 0.25f, -0.25f, 0.25f, 0.80f), //4
-            Vec4( 0.25f,  0.25f, 0.25f, 0.80f), //5
-
-            Vec4(-0.25f, -0.25f, 0.00f, 0.85f), //6
-            Vec4( 0.25f, -0.25f, 0.00f, 0.85f), //7
-            Vec4( 0.25f, -0.25f, 0.25f, 0.85f), //8
-            Vec4(-0.25f, -0.25f, 0.25f, 0.85f), //9 678896
-
-            Vec4(-0.25f, -0.25f, 0.00f, 0.90f), //10
-            Vec4(-0.25f, -0.25f, 0.25f, 0.90f), //11
-            Vec4( 0.25f,  0.25f, 0.25f, 0.90f), //12
-            Vec4( 0.25f,  0.25f, 0.00f, 0.90f), //13 //10 11 12 12 13 10
-
-            Vec4( 0.25f, -0.25f, 0.00f, 0.95f), //14
-            Vec4( 0.25f,  0.25f, 0.00f, 0.95f), //15
-            Vec4( 0.25f,  0.25f, 0.25f, 0.95f), //16
-            Vec4( 0.25f, -0.25f, 0.25f, 0.95f), //17 //14 15 16 16 17 14
-            },
-      		//Indices
-			{2, 1, 0,
-             3, 4, 5,
-             6, 7, 8,
-             8, 9, 6,
-             10, 11, 12,
-             12, 13, 10,
-             14, 15, 16,
-             16, 17, 14},
-		    0, //VAO
-		    {0, 0}//VBOs
-};*/
-shape square = {
-			{//Vertices
-			Vec4(-0.25f, -0.25f, 0.00f, 1.0f), //0
-			Vec4( 0.25f, -0.25f, 0.00f, 1.0f), //1
-			Vec4( 0.25f,  0.25f, 0.00f, 1.0f), //2
-			Vec4(-0.25f,  0.25f, 0.00f, 1.0f), //3
-
-            Vec4(-0.25f, -0.25f, 0.75f, 0.75f), //4
-            Vec4( 0.25f, -0.25f, 0.75f, 0.75f), //5
-            Vec4( 0.25f,  0.25f, 0.75f, 0.75f), //6
-            Vec4(-0.25f,  0.25f, 0.75f, 0.75f), //7
-
-            Vec4(-0.25f, -0.25f, 0.00f, 0.80f), //8
-            Vec4( 0.25f, -0.25f, 0.00f, 0.80f), //9
-            Vec4( 0.25f, -0.25f, 0.75f, 0.80f), //10
-            Vec4(-0.25f, -0.25f, 0.75f, 0.80f), //11
-
-            Vec4(-0.25f,  0.25f, 0.00f, 0.85f), //12
-            Vec4( 0.25f,  0.25f, 0.00f, 0.85f), //13
-            Vec4( 0.25f,  0.25f, 0.75f, 0.85f), //14
-            Vec4(-0.25f,  0.25f, 0.75f, 0.85f), //15
-
-            Vec4(-0.25f, -0.25f, 0.00f, 0.90f), //16
-            Vec4(-0.25f, -0.25f, 0.75f, 0.90f), //17
-            Vec4(-0.25f,  0.25f, 0.75f, 0.90f), //18
-            Vec4(-0.25f,  0.25f, 0.00f, 0.90f), //19
-
-            Vec4( 0.25f, -0.25f, 0.00f, 0.95f), //20
-            Vec4( 0.25f, -0.25f, 0.75f, 0.95f), //21
-            Vec4( 0.25f,  0.25f, 0.75f, 0.95f), //22
-            Vec4( 0.25f,  0.25f, 0.00f, 0.95f), //23
-
-            },
-			//indices
-			{2, 1, 0,
-			 0, 3, 2,
-             4, 5, 6,
-             6, 7, 4,
-             8, 9, 10,
-             10, 11, 8,
-             14, 13, 12,
-             12, 15, 14,
-             16, 17, 18,
-             18, 19, 16,
-             22, 21, 20,
-             20, 23, 22
-             },
-		0, //VAO
-		{0, 0} //VBOs
-};
-shape parallelogram = {
-						{//Vertices
-                        	Vec4( 0.00f, -0.25f, 0.0f, 1.0f), //0
-	                        Vec4( 0.50f, -0.25f, 0.0f, 1.0f), //1
-	                        Vec4( 0.00f,  0.25f, 0.0f, 1.0f), //2
-        	                Vec4(-0.50f,  0.25f, 0.0f, 1.0f), //3
-
-                            Vec4( 0.00f, -0.25f, 1.0f, 0.75f), //4
-                            Vec4( 0.50f, -0.25f, 1.0f, 0.75f), //5
-                            Vec4( 0.00f,  0.25f, 1.0f, 0.75f), //6
-                            Vec4(-0.50f,  0.25f, 1.0f, 0.75f), //7
-
-                            Vec4( 0.00f, -0.25f, 0.0f, 0.80f), //8
-                            Vec4( 0.50f, -0.25f, 0.0f, 0.80f), //9
-                            Vec4( 0.00f, -0.25f, 1.0f, 0.80f), //10
-                            Vec4( 0.50f, -0.25f, 1.0f, 0.80f), //11
-
-                            Vec4( 0.00f,  0.25f, 0.0f, 0.85f), //12
-                            Vec4(-0.50f,  0.25f, 0.0f, 0.85f), //13
-                            Vec4( 0.00f,  0.25f, 1.0f, 0.85f), //14
-                            Vec4(-0.50f,  0.25f, 1.0f, 0.85f), //15
-
-                            Vec4( 0.00f, -0.25f, 1.0f, 0.90f), //16
-                            Vec4(-0.50f,  0.25f, 0.0f, 0.90f), //17
-                            Vec4( 0.00f, -0.25f, 0.0f, 0.90f), //18
-                            Vec4(-0.50f,  0.25f, 1.0f, 0.90f), //19
-
-                            Vec4( 0.50f, -0.25f, 1.0f, 0.95f), //20
-                            Vec4( 0.50f, -0.25f, 0.0f, 0.95f), //21
-                            Vec4( 0.00f,  0.25f, 0.0f, 0.95f), //22
-                            Vec4( 0.00f,  0.25f, 1.0f, 0.95f), //23
-
-                        },
-      					//indices
-						{2, 1, 0,
-						2, 0, 3,
-                        4, 5, 6,
-                        6, 7, 4,
-                        8, 9, 10,
-                        10, 9, 11,
-                        12, 13, 14,
-                        14, 13, 15,
-                        16, 17, 18,
-                        16, 19, 17,
-                        20, 21, 22,
-                        22, 23, 20
-                        },
-			0, //VAO
-			{0, 0} //VBOs
-};
-
-
-std::vector<shape> shapes = {square, parallelogram};
-
-/////////////////////////////////////////////////////////////////////// ERRORS
-
+OBJMesh* square;
+OBJMesh* parallelogram;
 
 
 void createCubeShaderProgram(){
@@ -255,85 +103,6 @@ void destroyShaderPrograms()
 	checkOpenGLError("ERROR: Could not destroy shaders.");
 }
 
-/////////////////////////////////////////////////////////////////////// VAOs & VBOs
-
-
-void createBufferObjects(shape& s){
-	
-	
-	//Prepare data
-	GLfloat* vertices;
-    GLfloat* shades;
-	size_t vertex_i = 0;
-	vertices = new GLfloat[s.indices.size()*4];
-    shades = new GLfloat[s.indices.size()];
-	for(size_t i=0; i<s.vertices.size();/*empty*/){
-        Vec4 vertex = s.vertices[i];
-		vertices[vertex_i++] = vertex[0];
-        vertices[vertex_i++] = vertex[1];
-        vertices[vertex_i++] = vertex[2];
-        vertices[vertex_i++] = 1.0f;
-
-		shades[i++] = vertex[3];
-	}
-
-	GLuint* indices;
-	size_t index_i = 0;
-	indices = new GLuint[s.indices.size()];
-	for(GLuint index : s.indices){
-		indices[index_i++] = index;
-	}
-
-	//Upload buffers
-	glGenVertexArrays(1, &s.VAO);
-
-	glBindVertexArray(s.VAO);
-	{
-		glGenBuffers(2, s.VBOs);
-
-		glBindBuffer(GL_ARRAY_BUFFER, s.VBOs[0]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i+sizeof(GLfloat)*index_i, NULL, GL_STATIC_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*vertex_i, vertices);
-        glBufferSubData(GL_ARRAY_BUFFER, sizeof(GLfloat)*vertex_i, sizeof(GLfloat)*index_i, shades);
-
-		glEnableVertexAttribArray(VERTICES);
-		glVertexAttribPointer(VERTICES, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, 0);
-
-        glEnableVertexAttribArray(SHADES);
-        glVertexAttribPointer(SHADES, 1, GL_FLOAT, GL_FALSE, sizeof(GLfloat), (GLvoid *)(sizeof(GLfloat)*vertex_i));
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s.VBOs[1]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*index_i, indices, GL_STATIC_DRAW);
-	}
-	
-	delete[] vertices;
-    delete[] shades;
-	delete[] indices;
-	
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-
-	checkOpenGLError("ERROR: Could not create VAOs and VBOs.");
-}
-
-void destroyBufferObjects()
-{
-	for(shape s : shapes){
-		glBindVertexArray(s.VAO);
-		glDisableVertexAttribArray(VERTICES);
-        glDisableVertexAttribArray(SHADES);
-		glDeleteBuffers(2, s.VBOs);
-		glDeleteVertexArrays(1, &s.VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-
-		checkOpenGLError("ERROR: Could not destroy VAOs and VBOs.");
-	}
-}
-
 /////////////////////////////////////////////////////////////////////// SCENE
 
 void drawScene()
@@ -355,19 +124,18 @@ void drawScene()
 	CGJM::Mat4 VP = P*V; //VP part of MVP
     CGJM::Mat4 M(1);
 
-	/*cubeShader->use();
+	cubeShader->use();
+    M = CGJM::translate(0.0f, -2.0f, 0.0f);
     glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
     cube->draw();
-*/
+
 	tangramShader->use();
 
     /*1 square*/
-	/*glBindVertexArray(square.VAO);
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
     M = CGJM::translate(-0.75f, -0.75f, 0.0f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)square.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-	*/
+    square->draw();
 
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
@@ -396,12 +164,10 @@ void drawScene()
 	triangle->draw();
 
 	/*1 parallelogram*/	
-	/*glBindVertexArray(parallelogram.VAO);
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
 	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2.0f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)parallelogram.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-    */
+    parallelogram->draw();
 
 	glUseProgram(0);
 	glBindVertexArray(0);
@@ -414,6 +180,13 @@ void drawScene()
 void cleanup()
 {
     cube->unload();
+    triangle->unload();
+    square->unload();
+    parallelogram->unload();
+    delete cube;
+    delete triangle;
+    delete square;
+    delete parallelogram;
 	//destroyBufferObjects();
 	destroyShaderPrograms();
 }
@@ -652,6 +425,8 @@ void init(int argc, char* argv[])
     WASD[E] = 0;
 	cube = new OBJMesh("res/cube_vn.obj");
 	triangle = new OBJMesh("res/triangle.obj");
+    square = new OBJMesh("res/square.obj");
+    parallelogram = new OBJMesh("res/parallelogram.obj");
 }
 
 int main(int argc, char* argv[])
