@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2.2)
-project(CGJMquaternions CXX)
+project(CGJMscene CXX)
 
 include_directories(
 	includes/
@@ -7,21 +7,20 @@ include_directories(
 	${GLUT_INCLUDE_DIR}
 	${CGJMvector_INCLUDE_DIRS}
 	${CGJMmatrix_INCLUDE_DIRS}
-	${CGJMshader_INCLUDE_DIRS})
+	${CGJMshader_INCLUDE_DIRS}
+    ${CGJMquaternions_INCLUDE_DIRS})
 
 set(SOURCE_FILES
-		src/quat.cpp
-		src/quat.cpp)
+        src/OBJMesh.cpp)
 set(TEST_FILES
-		tests/quat_tangram.cpp
+		tests/scene_viewer.cpp
 		)
 
-add_executable(quat_tangram ${SOURCE_FILES} ${TEST_FILES})
-target_link_libraries(quat_tangram ${GLEW_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} CGJMvector CGJMmatrix CGJMshader)
-add_dependencies(quat_tangram InstallFreeGLUT)
-add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_executable(scene_viewer ${SOURCE_FILES} ${TEST_FILES})
+target_link_libraries(scene_viewer ${GLEW_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} CGJMvector CGJMmatrix CGJMshader CGJMquaternions)
+add_dependencies(scene_viewer InstallFreeGLUT)
 
-add_custom_command(TARGET quat_tangram POST_BUILD
+add_custom_command(TARGET scene_viewer POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
 		   ${PROJECT_SOURCE_DIR}/res $<TARGET_FILE_DIR:shaderTest>/res)
 
