@@ -13,6 +13,12 @@
 
 OBJMesh::OBJMesh() =default;
 
+OBJMesh::OBJMesh(const std::string &filename) {
+    loadFromFile(filename);
+    prepare();
+    freeMeshData();
+}
+
 void parseVertex(std::stringstream& sin, objGroup* group)
 {
     auto v = new objVertex;
@@ -46,6 +52,7 @@ void parseFace(std::stringstream& sin, objGroup* group)
         if(!token.empty()) f->texCoords[i] = (unsigned int)std::stoi(token);
         std::getline(sin, token, ' ');
         if(!token.empty()) f->normals[i] = (unsigned int)std::stoi(token);
+
     }
 }
 void parseLine(std::stringstream& sin, objGroup* group){
@@ -68,6 +75,7 @@ void OBJMesh::loadFromFile(const std::string& filename) {
         std::stringstream sin = std::stringstream(line);
         parseLine(sin, group);
     }
+    group->faceCount = group->faces.size();
 }
 
 void OBJMesh::freeMeshData() {
@@ -92,10 +100,6 @@ void OBJMesh::freeMeshData() {
 }
 
 
-void OBJMesh::assignShader(GLuint shaderProgram) {
-    shader = shaderProgram;
-}
-
 void prepareGroup(objGroup* group){
     glGenVertexArrays(1, &(group->vao));
     glBindVertexArray(group->vao);
@@ -113,8 +117,6 @@ void prepareGroup(objGroup* group){
         GLushort ni=0;
         GLushort ti=0;
         GLushort ii=0;
-
-        //TODO FIX OBJ indexes start at 1
 
         for(objFace* f : group->faces){
             for(int i=0; i<3; i++){
@@ -183,10 +185,8 @@ void prepareGroup(objGroup* group){
 }
 
 void OBJMesh::prepare() {
-    //glUseProgram(shader);
     for(objGroup* group : groups)
         prepareGroup(group);
-    //glUseProgram(0);
 }
 
 void unloadGroup(objGroup* group){
@@ -208,7 +208,7 @@ void OBJMesh::unload() {
 
 void drawGroup(objGroup* group){
     glBindVertexArray(group->vao);
-    glDrawElements(GL_TRIANGLES, (GLsizei)group->faces.size()*3, GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, (GLsizei)group->faceCount*3, GL_UNSIGNED_SHORT, 0);
 }
 
 void OBJMesh::draw(){

@@ -46,17 +46,18 @@ typedef struct {
     GLuint vbos[3];
     GLuint eab;
 
+    unsigned long faceCount;
+
 } objGroup;
 
 class OBJMesh{
 private:
    std::vector<objGroup*> groups;
-   GLuint shader;
 
 public:
     OBJMesh();
+    OBJMesh(const std::string& filename);
     void loadFromFile(const std::string& filename);
-    void assignShader(GLuint shaderProgram);
     void freeMeshData();
     void prepare();
     void unload();

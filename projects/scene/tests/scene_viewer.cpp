@@ -30,7 +30,9 @@ unsigned int FrameCount = 0;
 
 GLint MVPUniform;
 GLint colorUniform;
-Shader* shaderProgram;
+
+Shader* cubeShader;
+Shader* tangramShader;
 
 #define W 0
 #define A 1
@@ -60,7 +62,8 @@ bool perspectiveProjection = true;
 CGJM::Mat4 P; //Projection Matrix
 
 
-OBJMesh cube;
+OBJMesh* cube;
+OBJMesh* triangle;
 
 typedef struct{
 	std::vector<Vec4> vertices;
@@ -71,7 +74,7 @@ typedef struct{
 
 
 /////////////////////////////////////////////////////////////////////// CREATE SHAPES
-
+/*
 shape triangle = {
 			{//Vertices 	//Small triangle (others are obtained through scale)
 			Vec4(-0.25f, -0.25f, 0.00f, 1.00f), //0
@@ -108,7 +111,7 @@ shape triangle = {
              16, 17, 14},
 		    0, //VAO
 		    {0, 0}//VBOs
-};
+};*/
 shape square = {
 			{//Vertices
 			Vec4(-0.25f, -0.25f, 0.00f, 1.0f), //0
@@ -211,32 +214,44 @@ shape parallelogram = {
 };
 
 
-std::vector<shape> shapes = {triangle, square, parallelogram};
+std::vector<shape> shapes = {square, parallelogram};
 
 /////////////////////////////////////////////////////////////////////// ERRORS
 
 
 
-void createShaderProgram()
-{
-	shaderProgram = new Shader("res/cube_vs.glsl", "res/cube_fs.glsl");
+void createCubeShaderProgram(){
+	cubeShader = new Shader("res/cube_vs.glsl", "res/cube_fs.glsl");
 
-    shaderProgram->setAttribLocation("inPosition", VERTICES__ATTR);
-    shaderProgram->setAttribLocation("inTexcoord", TEXCOORDS_ATTR);
-    shaderProgram->setAttribLocation("inNormal", NORMALS__ATTR);
+    cubeShader->setAttribLocation("inPosition", VERTICES__ATTR);
+    cubeShader->setAttribLocation("inTexcoord", TEXCOORDS_ATTR);
+    cubeShader->setAttribLocation("inNormal", NORMALS__ATTR);
 
-	shaderProgram->link();
+	cubeShader->link();
 
-	MVPUniform = shaderProgram->getUniformLocation("MVP");
-	colorUniform = shaderProgram->getUniformLocation("color");
-	
+	MVPUniform = cubeShader->getUniformLocation("MVP");
+
 	checkOpenGLError("ERROR: Could not create shaders.");
 }
 
-void destroyShaderProgram()
+void createTangramShaderProgram(){
+	tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
+
+	tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
+	tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
+
+	tangramShader->link();
+
+	MVPUniform = tangramShader->getUniformLocation("MVP");
+	colorUniform = tangramShader->getUniformLocation("color");
+
+	checkOpenGLError("ERROR: Could not create shaders.");
+}
+void destroyShaderPrograms()
 {
 	glUseProgram(0);
-	delete shaderProgram;
+	delete cubeShader;
+	delete tangramShader;
 	checkOpenGLError("ERROR: Could not destroy shaders.");
 }
 
@@ -323,8 +338,6 @@ void destroyBufferObjects()
 
 void drawScene()
 {
-	shaderProgram->use();
-
 	CGJM::Mat4 R;
     CGJM::Mat4 V;
 	if(gimbal){
@@ -342,9 +355,11 @@ void drawScene()
 	CGJM::Mat4 VP = P*V; //VP part of MVP
     CGJM::Mat4 M(1);
 
-
+	/*cubeShader->use();
     glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    cube.draw();
+    cube->draw();
+*/
+	tangramShader->use();
 
     /*1 square*/
 	/*glBindVertexArray(square.VAO);
@@ -355,33 +370,30 @@ void drawScene()
 	*/
 
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
-	/*glBindVertexArray(triangle.VAO);
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
 	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-
+	triangle->draw();
 
 	glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
 	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-	
+	triangle->draw();
+
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-	
+	triangle->draw();
+
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
 	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
+	triangle->draw();
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	glDrawElements(GL_TRIANGLES, (GLsizei)triangle.indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
-    */
+	triangle->draw();
 
 	/*1 parallelogram*/	
 	/*glBindVertexArray(parallelogram.VAO);
@@ -401,9 +413,9 @@ void drawScene()
 
 void cleanup()
 {
-    cube.unload();
+    cube->unload();
 	//destroyBufferObjects();
-	destroyShaderProgram();
+	destroyShaderPrograms();
 }
 
 void display()
@@ -626,7 +638,8 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
-	createShaderProgram();
+	createCubeShaderProgram();
+	createTangramShaderProgram();
 	/*createBufferObjects(triangle);
 	createBufferObjects(square);
 	createBufferObjects(parallelogram);*/
@@ -637,9 +650,8 @@ void init(int argc, char* argv[])
     WASD[D] = 0;
     WASD[Q] = 0;
     WASD[E] = 0;
-    cube.loadFromFile("res/cube_vn.obj");
-    cube.prepare();
-    //cube.freeMeshData();
+	cube = new OBJMesh("res/cube_vn.obj");
+	triangle = new OBJMesh("res/triangle.obj");
 }
 
 int main(int argc, char* argv[])
