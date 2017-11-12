@@ -13,8 +13,12 @@ SphereCamera::SphereCamera(float distance, Vec3 center, Quat originalOrientation
     orientation = originalOrientation;
 }
 Mat4 SphereCamera::getMatrix() {
-    return projection * CGJM::translate(0, 0, -distance) * orientation.GLMatrix().transpose()
-                        * CGJM::translate(-position[0], -position[1], -position[2]);
+    return projection * getViewMatrix();
+}
+
+Mat4 SphereCamera::getViewMatrix() {
+    return CGJM::translate(0, 0, -distance) * orientation.GLMatrix().transpose()
+           * CGJM::translate(-position[0], -position[1], -position[2]);
 }
 
 void SphereCamera::move(float x, float y, float z){
@@ -25,3 +29,5 @@ void SphereCamera::changeOrientation(float yaw, float pitch, float roll){
     orientation = Quat(pitch, right) * orientation;
     orientation = Quat(roll, front) * orientation;
 }
+
+SphereCamera::~SphereCamera()=default;

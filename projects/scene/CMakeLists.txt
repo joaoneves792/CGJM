@@ -13,7 +13,7 @@ include_directories(
 set(SOURCE_FILES
         src/OBJMesh.cpp
 		src/SphereCamera.cpp
-		src/FreeCamera.cpp src/Camera.cpp)
+		src/FreeCamera.cpp src/Camera.cpp src/SceneGraph.cpp)
 set(TEST_FILES
 		tests/scene_viewer.cpp
 		)

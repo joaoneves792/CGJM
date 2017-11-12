@@ -21,10 +21,13 @@ protected:
     Mat4 projection;
 public:
     virtual Mat4 getMatrix()=0;
+    Mat4 getProjectionMatrix();
+    virtual Mat4 getViewMatrix()=0;
     virtual void move(float x, float y, float z)=0;
     virtual void changeOrientation(float yaw, float pitch, float roll)=0;
     void perspective(float fovy, float aspectRatio, float near, float far);
     void ortho(float left, float right, float top, float bottom, float near, float far);
+    virtual ~Camera()= default;
 };
 
 #endif //CGJM_CAMERA_H

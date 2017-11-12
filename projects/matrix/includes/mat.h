@@ -1,6 +1,8 @@
 #include <iostream>
 #pragma once
 
+#include "vec.h"
+
 namespace CGJM{
 
 class Mat4{

@@ -6,9 +6,11 @@
 
 #include "Shader.h"
 #include "glerrors.h"
+#include "mat.h"
 
 Shader::Shader(const char* path_vert_shader, const char* path_frag_shader){
 	create_program(path_vert_shader, path_frag_shader);
+    uploadMVPCallback = nullptr;
 }
 
 
@@ -147,4 +149,13 @@ GLint Shader::getUniformLocation(const char* name){
 
 void Shader::use(){
         glUseProgram(_shaderProgram);
+}
+
+void Shader::setMVPFunction(std::function<void(Mat4, Mat4, Mat4)> callback) {
+    uploadMVPCallback = callback;
+}
+
+void Shader::uploadMVP(Mat4 M, Mat4 V, Mat4 P) {
+    if(uploadMVPCallback != nullptr)
+        uploadMVPCallback(M, V, P);
 }

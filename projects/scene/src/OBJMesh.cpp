@@ -145,7 +145,7 @@ void prepareGroup(objGroup* group){
             ii++;
         }
 
-        glGenBuffers(1, &group->vbos[VERTICES_VBO]);
+        glGenBuffers(3, group->vbos);
         glBindBuffer(GL_ARRAY_BUFFER, group->vbos[VERTICES_VBO]);
         glBufferData(GL_ARRAY_BUFFER, vi * sizeof(float), vertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(VERTICES__ATTR);
@@ -153,7 +153,6 @@ void prepareGroup(objGroup* group){
 
         if (ti > 0)
         {
-            glGenBuffers(1, &group->vbos[TEXCOORDS_VBO]);
             glBindBuffer(GL_ARRAY_BUFFER, group->vbos[TEXCOORDS_VBO]);
             glBufferData(GL_ARRAY_BUFFER, ti * sizeof(float), texCoords, GL_STATIC_DRAW);
             glEnableVertexAttribArray(TEXCOORDS_ATTR);
@@ -161,7 +160,6 @@ void prepareGroup(objGroup* group){
         }
         if (ni > 0)
         {
-            glGenBuffers(1, &group->vbos[NORMALS_VBO]);
             glBindBuffer(GL_ARRAY_BUFFER, group->vbos[NORMALS_VBO]);
             glBufferData(GL_ARRAY_BUFFER, ni * sizeof(float), normals, GL_STATIC_DRAW);
             glEnableVertexAttribArray(NORMALS__ATTR);
@@ -209,6 +207,7 @@ void OBJMesh::unload() {
 void drawGroup(objGroup* group){
     glBindVertexArray(group->vao);
     glDrawElements(GL_TRIANGLES, (GLsizei)group->faceCount*3, GL_UNSIGNED_SHORT, 0);
+    glBindVertexArray(0);
 }
 
 void OBJMesh::draw(){

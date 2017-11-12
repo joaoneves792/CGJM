@@ -12,7 +12,9 @@ class SphereCamera : public Camera{
 public:
     SphereCamera(float distance, Vec3 center, Quat originalOrientation);
     virtual Mat4 getMatrix();
+    virtual Mat4 getViewMatrix();
     virtual void move(float x, float y, float z);
     virtual void changeOrientation(float yaw, float pitch, float roll);
+    virtual ~SphereCamera();
 };
 #endif //CGJM_SPHERECAMERA_H

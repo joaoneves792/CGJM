@@ -17,6 +17,7 @@
 #include "Camera.h"
 #include "SphereCamera.h"
 #include "FreeCamera.h"
+#include "SceneGraph.h"
 
 #define CAPTION "SCENE VIEWER (Press ESC to quit)"
 
@@ -32,12 +33,6 @@ unsigned int FrameCount = 0;
 #define VERTICES 0
 #define SHADES 1
 
-GLint MVPUniform;
-GLint colorUniform;
-
-Shader* cubeShader;
-Shader* tangramShader;
-
 #define W 0
 #define A 1
 #define S 2
@@ -50,71 +45,93 @@ int mouseX = WinX/2;
 int mouseY = WinY/2;
 
 Camera* camera;
+SceneGraph* scene;
 
-OBJMesh* cube;
-OBJMesh* triangle;
-OBJMesh* square;
-OBJMesh* parallelogram;
+std::vector<OBJMesh*> meshes;
+std::vector<Shader*> shaders;
 
+/////////////////////////////////////////////////////////////////////// SCENE
+void setupScene(){
+    camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
+    //camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 
-void createCubeShaderProgram(){
-	cubeShader = new Shader("res/cube_vs.glsl", "res/cube_fs.glsl");
+    auto rootNode = new SceneNode();
+    scene = new SceneGraph(camera, rootNode);
 
+    //Load Models
+    auto cube = new OBJMesh("res/cube_vn.obj");
+    meshes.push_back(cube);
+    auto triangle = new OBJMesh("res/triangle_rot.obj");
+    meshes.push_back(triangle);
+    auto square = new OBJMesh("res/square_rot.obj");
+    meshes.push_back(square);
+    auto parallelogram = new OBJMesh("res/parallelogram_rot.obj");
+    meshes.push_back(parallelogram);
+
+    //Load Shaders
+    auto cubeShader = new Shader("res/cube_vs.glsl", "res/cube_fs.glsl");
+    shaders.push_back(cubeShader);
     cubeShader->setAttribLocation("inPosition", VERTICES__ATTR);
     cubeShader->setAttribLocation("inTexcoord", TEXCOORDS_ATTR);
     cubeShader->setAttribLocation("inNormal", NORMALS__ATTR);
+    cubeShader->link();
+    cubeShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
+        GLint uniformLocation = cubeShader->getUniformLocation("MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
+    });
 
-	cubeShader->link();
+    auto tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
+    shaders.push_back(tangramShader);
+    tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
+    tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
+    tangramShader->link();
+    const GLint colorUniform = tangramShader->getUniformLocation("color");
+    tangramShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
+        GLint uniformLocation = tangramShader->getUniformLocation("MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
+    });
+    checkOpenGLError("ERROR: Could not create shaders.");
 
-	MVPUniform = cubeShader->getUniformLocation("MVP");
 
-	checkOpenGLError("ERROR: Could not create shaders.");
-}
+    //Create Nodes
+    auto cubeNode = new SceneNode(cube, cubeShader);
+    rootNode->addChild(cubeNode);
+    cubeNode->translate(0.0f, -1.0f, 0.0f);
 
-void createTangramShaderProgram(){
-	tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
+    auto squareNode = new SceneNode(square, tangramShader);
+    squareNode->translate(-0.75f, 1.0f, -0.75f);
+    squareNode->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
+    });
+    cubeNode->addChild(squareNode);
 
-	tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
-	tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
+    auto parallelogramNode = new SceneNode(parallelogram, tangramShader);
+    parallelogramNode->translate(0.0f, 1.0f, 0.75f);
+    parallelogramNode->setPreDraw([=](){
+            glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
+    });
+    cubeNode->addChild(parallelogramNode);
 
-	tangramShader->link();
 
-	MVPUniform = tangramShader->getUniformLocation("MVP");
-	colorUniform = tangramShader->getUniformLocation("color");
 
-	checkOpenGLError("ERROR: Could not create shaders.");
-}
-void destroyShaderPrograms()
-{
-	glUseProgram(0);
-	delete cubeShader;
-	delete tangramShader;
-	checkOpenGLError("ERROR: Could not destroy shaders.");
-}
 
-/////////////////////////////////////////////////////////////////////// SCENE
+    }
 
-void drawScene()
-{
 
-	CGJM::Mat4 VP = camera->getMatrix(); //VP part of MVP
-    CGJM::Mat4 M(1);
-
-	cubeShader->use();
-    M = CGJM::translate(0.0f, -2.0f, 0.0f);
-    glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    cube->draw();
-
-	tangramShader->use();
-
+    void drawScene()
+    {
+        scene->draw();
+        checkOpenGLError("ERROR: Could not draw scene.");
+        /*
+        tangramShader->use();
+        */
     /*1 square*/
-	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
-    M = CGJM::translate(-0.75f, 0.0f, -0.75f);
+    /*M = CGJM::translate(-0.75f, 0.0f, -0.75f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    square->draw();
+    square->draw();*/
 
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
-	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
+	/*glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
 	M = CGJM::translate(-0.75f, 0.0f, -0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), M_PI); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
@@ -137,34 +154,38 @@ void drawScene()
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
 	M = CGJM::translate(-0.25f, 0.0f, 0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), -M_PI/2.0f); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();
+	triangle->draw();*/
 
 	/*1 parallelogram*/	
-	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
+	/*glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
 	M = CGJM::translate(0.0f, 0.0f, 0.75f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    parallelogram->draw();
+    parallelogram->draw();*/
 
-	glUseProgram(0);
-	glBindVertexArray(0);
-
-	checkOpenGLError("ERROR: Could not draw scene.");
 }
 
 /////////////////////////////////////////////////////////////////////// CALLBACKS
 
 void cleanup()
 {
-    cube->unload();
-    triangle->unload();
-    square->unload();
-    parallelogram->unload();
-    delete cube;
-    delete triangle;
-    delete square;
-    delete parallelogram;
-	//destroyBufferObjects();
-	destroyShaderPrograms();
+    //Destroy meshes
+    for(OBJMesh* m : meshes){
+        m->unload();
+        delete m;
+    }
+    meshes.clear();
+
+    //Destroy shaders
+    glUseProgram(0);
+    for(Shader* s: shaders){
+        delete s;
+    }
+    checkOpenGLError("ERROR: Could not destroy shaders.");
+
+    scene->destroy();
+
+    //Destroy the camera
+    delete camera;
 }
 
 void display()
@@ -379,24 +400,15 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
-	createCubeShaderProgram();
-	createTangramShaderProgram();
-	/*createBufferObjects(triangle);
-	createBufferObjects(square);
-	createBufferObjects(parallelogram);*/
 	setupCallbacks();
+    setupScene();
+
     WASD[W] = 0;
     WASD[A] = 0;
     WASD[S] = 0;
     WASD[D] = 0;
     WASD[Q] = 0;
     WASD[E] = 0;
-	cube = new OBJMesh("res/cube_vn.obj");
-	triangle = new OBJMesh("res/triangle_rot.obj");
-    square = new OBJMesh("res/square_rot.obj");
-    parallelogram = new OBJMesh("res/parallelogram_rot.obj");
-	camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
-    //camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 }
 
 int main(int argc, char* argv[])
