@@ -11,7 +11,9 @@ include_directories(
     ${CGJMquaternions_INCLUDE_DIRS})
 
 set(SOURCE_FILES
-        src/OBJMesh.cpp)
+        src/OBJMesh.cpp
+		src/SphereCamera.cpp
+		src/FreeCamera.cpp src/Camera.cpp)
 set(TEST_FILES
 		tests/scene_viewer.cpp
 		)

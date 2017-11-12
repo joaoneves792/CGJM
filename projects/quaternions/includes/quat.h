@@ -15,6 +15,7 @@ public:
 	float t, x, y, z;
 	const float qThreshold = (float)1.0e-5;
 public:
+	Quat();
 	Quat(const float& angle, const Vec3& axis);
 	Quat(const float& t, const float& x, const float& y, const float& z);
 	Quat(const Quat& other);

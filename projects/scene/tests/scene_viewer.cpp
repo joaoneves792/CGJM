@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include <OBJMesh.h>
 
 #include "GL/glew.h"
 #include "GL/freeglut.h"
@@ -13,6 +12,11 @@
 #include "vec.h"
 #include "mat.h"
 #include "quat.h"
+
+#include "OBJMesh.h"
+#include "Camera.h"
+#include "SphereCamera.h"
+#include "FreeCamera.h"
 
 #define CAPTION "SCENE VIEWER (Press ESC to quit)"
 
@@ -44,23 +48,8 @@ Shader* tangramShader;
 unsigned char WASD[6];
 int mouseX = WinX/2;
 int mouseY = WinY/2;
-float cameraDistance = 5.0f;
-float cameraYaw = 0.0f;
-float cameraRoll = 0.0f;
-float cameraPitch = 0.0f;
 
-const Vec3 front(0, 0 ,-1);
-const Vec3 up(0, 1, 0);
-const Vec3 right(1, 0, 0);
-
-Quat cameraOrientation(0, up);
-
-
-bool gimbal = false;
-bool perspectiveProjection = true;
-
-CGJM::Mat4 P; //Projection Matrix
-
+Camera* camera;
 
 OBJMesh* cube;
 OBJMesh* triangle;
@@ -107,21 +96,8 @@ void destroyShaderPrograms()
 
 void drawScene()
 {
-	CGJM::Mat4 R;
-    CGJM::Mat4 V;
-	if(gimbal){
-		//order XYZ
-		R = CGJM::rotate(front, cameraRoll) *
-				 CGJM::rotate(up, cameraYaw) *
-				 CGJM::rotate(right, cameraPitch);
 
-	}else{
-		R = cameraOrientation.GLMatrix().transpose();
-	}
-
-	V = CGJM::translate(0.0f, 0.0f, -cameraDistance) * R;
-
-	CGJM::Mat4 VP = P*V; //VP part of MVP
+	CGJM::Mat4 VP = camera->getMatrix(); //VP part of MVP
     CGJM::Mat4 M(1);
 
 	cubeShader->use();
@@ -133,39 +109,39 @@ void drawScene()
 
     /*1 square*/
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
-    M = CGJM::translate(-0.75f, -0.75f, 0.0f);
+    M = CGJM::translate(-0.75f, 0.0f, -0.75f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
     square->draw();
 
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
 	glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
-	M = CGJM::translate(-0.25f, -0.75f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), 3*M_PI/2); //Small
+	M = CGJM::translate(-0.75f, 0.0f, -0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), M_PI); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
 
 	glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
-	M = CGJM::translate(0.00f, -0.50f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
+	M = CGJM::translate(-0.50f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), 5*M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
 
 	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
-	M = CGJM::translate(-0.50f, 0.00f, 0.0f)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
+	M = CGJM::translate(0.0f, 0.00f, -0.5f)*CGJM::rotate(Vec3(0.0f,1.0f, 0.0f), -M_PI/2)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
-	M = CGJM::translate(0.50f, 0.00f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), M_PI)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
+	M = CGJM::translate(0.0f, 0.00f, 0.5f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), M_PI/2)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
 
 	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
-	M = CGJM::translate(0.25f, -0.25f, 0.0f); //Small
+	M = CGJM::translate(-0.25f, 0.0f, 0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), -M_PI/2.0f); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();
 
 	/*1 parallelogram*/	
 	glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
-	M = CGJM::translate(0.75f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 0.0f, 1.0f), -M_PI/2.0f);
+	M = CGJM::translate(0.0f, 0.0f, 0.75f);
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
     parallelogram->draw();
 
@@ -209,17 +185,22 @@ void update(){
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
     if(WASD[W]){
-		cameraDistance -= (timeDelta*movementRate);
+		camera->move(0.0f, 0.0f, -(timeDelta*movementRate));
     }
+	if(WASD[A]){
+		camera->move(-timeDelta*movementRate, 0.0f, 0.0f);
+	}
     if(WASD[S]){
-		cameraDistance += (timeDelta*movementRate);
+		camera->move(0.0f, 0.0f, timeDelta*movementRate);
     }
+	if(WASD[D]){
+		camera->move(timeDelta*movementRate, 0.0f, 0.0f);
+	}
 
 
     /*Update camera roll*/
     if(WASD[Q] || WASD[E]) {
-        cameraRoll += ((WASD[Q])?-1:1)*(timeDelta*movementRate);
-		cameraOrientation = Quat(((WASD[Q])?-1:1)*(timeDelta*movementRate), front) * cameraOrientation;
+		camera->changeOrientation(0.0f, 0.0f, ((WASD[Q])?-1:1)*(timeDelta*movementRate));
     }
     
 }
@@ -235,13 +216,13 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-	P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, 5, -5, 10, -10);
+    camera->perspective((float)M_PI/4, (WinX/WinY), 0.1, 10);
 }
 
 void timer(int value)
 {
 	std::ostringstream oss;
-	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")" << ((perspectiveProjection)?" Persp ":" Ortho ") << "gimbal " << ((gimbal)?"ON":"OFF");
+	oss << CAPTION << ": " << FrameCount << " FPS @ (" << WinX << "x" << WinY << ")";
 	std::string s = oss.str();
 	glutSetWindow(WindowHandle);
 	glutSetWindowTitle(s.c_str());
@@ -260,13 +241,7 @@ void mouseTimer(int value)
 	mouseX = WinX / 2;
 	mouseY = WinY / 2;
 	
-	cameraYaw += deltaX*cameraRate;
-	cameraPitch += deltaY*cameraRate;
-
-	Quat pitchQuat = Quat(deltaY*cameraRate, right);
-	Quat yawQuat = Quat(deltaX*cameraRate, up);
-
-	cameraOrientation = pitchQuat * yawQuat * cameraOrientation;
+	camera->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
     glutTimerFunc(10, mouseTimer, 0);
 }
 
@@ -290,13 +265,6 @@ void keyboard(unsigned char key, int x, int y){
         case 'e':
             WASD[E] = key;
             return;
-		case 'p':
-			perspectiveProjection = !perspectiveProjection;
-			P = (perspectiveProjection)?CGJM::perspective((float)M_PI/4, (WinX/WinY), 0.1, 10):CGJM::ortho(-5, 5, 5, -5, 10, -10);
-			return;
-		case 'g':
-			gimbal = !gimbal;
-			return;
         case ESCAPE:
             glutLeaveMainLoop();
             return;
@@ -424,9 +392,11 @@ void init(int argc, char* argv[])
     WASD[Q] = 0;
     WASD[E] = 0;
 	cube = new OBJMesh("res/cube_vn.obj");
-	triangle = new OBJMesh("res/triangle.obj");
-    square = new OBJMesh("res/square.obj");
-    parallelogram = new OBJMesh("res/parallelogram.obj");
+	triangle = new OBJMesh("res/triangle_rot.obj");
+    square = new OBJMesh("res/square_rot.obj");
+    parallelogram = new OBJMesh("res/parallelogram_rot.obj");
+	camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
+    //camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 }
 
 int main(int argc, char* argv[])

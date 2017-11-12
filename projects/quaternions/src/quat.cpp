@@ -6,6 +6,13 @@
 
 using namespace CGJM;
 
+Quat::Quat(){
+    t=0;
+    x=0;
+    y=0;
+    z=0;
+}
+
 Quat::Quat(const float& angle, const Vec3& axis){
     Vec3 nAxis = axis.normalize();
     t = std::cos(angle / 2.0f);
