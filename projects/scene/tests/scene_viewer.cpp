@@ -113,22 +113,56 @@ void setupScene(){
     cubeNode->addChild(parallelogramNode);
 
 
+    auto smallTriangle1Node = new SceneNode(triangle, tangramShader);
+    smallTriangle1Node->translate(-0.75f, 1.0f, -0.25f);
+    smallTriangle1Node->rotate(0.0f, 1.0f, 0.0f, M_PI);
+    smallTriangle1Node->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
+    });
+    cubeNode->addChild(smallTriangle1Node);
+
+    auto smallTriangle2Node = new SceneNode(triangle, tangramShader);
+    smallTriangle2Node->translate(-0.25f, 1.0f, 0.25f);
+    smallTriangle2Node->rotate(0.0f, 1.0f, 0.0f, -M_PI/2.0f);
+    smallTriangle2Node->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
+    });
+    cubeNode->addChild(smallTriangle2Node);
+
+    auto mediumTriangleNode = new SceneNode(triangle, tangramShader);
+    mediumTriangleNode->translate(-0.50f, 1.0f, 0.00f);
+    mediumTriangleNode->rotate(0.0f, 1.0f, 0.0f, 5.0f*M_PI/4.0f);
+    mediumTriangleNode->scale(1.414f, 1.414f, 1.414f);
+    mediumTriangleNode->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
+    });
+    cubeNode->addChild(mediumTriangleNode);
+
+    auto largeNode = new SceneNode();
+    largeNode->scale(2.0f, 2.0f, 2.0f);
+    cubeNode->addChild(largeNode);
+
+    auto largeTriangle1Node = new SceneNode(triangle, tangramShader);
+    largeTriangle1Node->translate(0.0f, 1.0f, -0.50f);
+    largeTriangle1Node->rotate(0.0f, 1.0f, 0.0f, -M_PI/2.0f);
+    largeTriangle1Node->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
+    });
+    largeNode->addChild(largeTriangle1Node);
+
+    auto largeTriangle2Node = new SceneNode(triangle, tangramShader);
+    largeTriangle2Node->translate(0.0f, 1.0f, 0.50f);
+    largeTriangle2Node->rotate(0.0f, 1.0f, 0.0f, M_PI/2.0f);
+    largeTriangle2Node->setPreDraw([=](){
+        glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
+    });
+    largeNode->addChild(largeTriangle2Node);
+}
 
 
-    }
-
-
-    void drawScene()
-    {
-        scene->draw();
-        checkOpenGLError("ERROR: Could not draw scene.");
-        /*
-        tangramShader->use();
-        */
-    /*1 square*/
-    /*M = CGJM::translate(-0.75f, 0.0f, -0.75f);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    square->draw();*/
+void drawScene(){
+    scene->draw();
+    checkOpenGLError("ERROR: Could not draw scene.");
 
 	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
 	/*glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
@@ -155,13 +189,6 @@ void setupScene(){
 	M = CGJM::translate(-0.25f, 0.0f, 0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), -M_PI/2.0f); //Small
 	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
 	triangle->draw();*/
-
-	/*1 parallelogram*/	
-	/*glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
-	M = CGJM::translate(0.0f, 0.0f, 0.75f);
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-    parallelogram->draw();*/
-
 }
 
 /////////////////////////////////////////////////////////////////////// CALLBACKS

@@ -21,6 +21,7 @@ private:
     Shader* shader;
     Vec3 position;
     Quat orientation;
+    Vec3 size;
 
     bool visible;
 
@@ -48,6 +49,8 @@ public:
     void lerpPosition(float x, float y, float z, float c);
     void lerpOrientation(float x, float y, float z, float angle, float c);
     void lerpOrientation(Quat q, float c);
+
+    void scale(float x, float y, float z);
 
     /*void setPreDraw(void(*callback)());
     void setPostDraw(void(*callback)());*/

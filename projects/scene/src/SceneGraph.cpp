@@ -14,6 +14,7 @@ SceneNode::SceneNode() {
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
     orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;
     post_draw = nullptr;
@@ -25,6 +26,7 @@ SceneNode::SceneNode(OBJMesh *mesh) {
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
     orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;
     post_draw = nullptr;
@@ -36,6 +38,7 @@ SceneNode::SceneNode(OBJMesh *mesh, Shader *shader) {
     this->shader = shader;
     position = Vec3(0.0f, 0.0f, 0.0f);
     orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;
     post_draw = nullptr;
@@ -82,6 +85,10 @@ void SceneNode::lerpOrientation(Quat q, float c) {
     //TODO
 }
 
+void SceneNode::scale(float x, float y, float z) {
+    size = Vec3(x, y, z);
+}
+
 void SceneNode::setPreDraw(std::function<void()> callback) {
     pre_draw = callback;
 }
@@ -102,20 +109,6 @@ void SceneNode::destroy() {
         delete (*it);
         it = childs.erase(it);
     }
-
-    /*
-    for(SceneNode* n : childs){
-        n->destroy();
-        delete n;
-    }
-    childs.clear();
-
-    //Erase ourselves from the parent
-    if(parent != nullptr){
-        for (auto it = parent->childs.begin(); it != parent->childs.end(); )
-            if (*it == this)
-                it = parent->childs.erase(it);
-    }*/
 }
 
 void SceneNode::update(int dt) {
@@ -126,10 +119,14 @@ void SceneNode::update(int dt) {
 
 Mat4 SceneNode::getModelMatrix() {
    if(parent == nullptr)
-       return CGJM::translate(position[0], position[1], position[2])*orientation.GLMatrix().transpose();
+       return CGJM::translate(position[0], position[1], position[2])*
+               orientation.GLMatrix().transpose()*
+               CGJM::scale(size[0], size[1], size[2]);
    else
-       return CGJM::translate(position[0], position[1], position[2])*orientation.GLMatrix().transpose() *
-               parent->getModelMatrix();
+       return CGJM::translate(position[0], position[1], position[2]) *
+               orientation.GLMatrix().transpose() *
+               parent->getModelMatrix()*
+               CGJM::scale(size[0], size[1], size[2]);
 }
 
 void SceneNode::draw(SceneGraph *scene) {
