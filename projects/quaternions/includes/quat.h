@@ -13,7 +13,7 @@ namespace CGJM{
 class Quat{
 public:
 	float t, x, y, z;
-	const float qThreshold = (float)1.0e-5;
+	static const float qThreshold;
 public:
 	Quat();
 	Quat(const float& angle, const Vec3& axis);

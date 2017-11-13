@@ -6,6 +6,10 @@
 
 using namespace CGJM;
 
+#define interpolate(v1, v2, t)  (1 - t) * v1 + t * v2
+
+const float Quat::qThreshold = (float)1.0e-5;
+
 Quat::Quat(){
     t=0;
     x=0;
@@ -157,19 +161,41 @@ const Quat Quat::operator*(const Quat &right) const {
                 t*right.z + z*right.t + x*right.y - y*right.x);
 }
 
-const Quat lerp(const Quat& q0, const Quat& q1, float k){
+const Quat CGJM::lerp(const Quat& q0, const Quat& q1, float k){
     float cos_angle = q0.x*q1.x + q0.y*q1.y + q0.z*q1.z + q0.t*q1.t;
     float k0 = 1.0f - k;
     float k1 = (cos_angle > 0) ? k : -k;
     Quat qi = ((q0*k0) + (q1*k1)).normalize();
     return qi;
 }
-const Quat slerp(const Quat& q0, const Quat& q1, float k){
-    float angle = std::acos(q0.x*q1.x + q0.y*q1.y + q0.z*q1.z + q0.t*q1.t);
+const Quat CGJM::slerp(const Quat& q0, const Quat& q1, float k){
+    Quat z = q1;
+    float cosTheta = q0.x*q1.x + q0.y*q1.y + q0.z*q1.z + q0.t*q1.t;
+
+    // If cosTheta < 0, the interpolation will take the long way around the sphere.
+    // To fix this, one quat must be negated.
+    if(cosTheta < 0){
+        z = Quat(-q1.t, -q1.x, -q1.y, -q1.z);
+        cosTheta = -cosTheta;
+    }
+    // Perform a linear interpolation when cosTheta is close to 1 to avoid side effect of sin(angle) becoming a zero denominator
+    if(cosTheta > (1-Quat::qThreshold)){
+        return Quat(
+                interpolate(q0.t, q1.t, k),
+                interpolate(q0.x, q1.x, k),
+                interpolate(q0.y, q1.y, k),
+                interpolate(q0.z, q1.z, k)
+        );
+    }else{
+        float angle = std::acos(cosTheta);
+        return (std::sin((1-k) *angle) * q0 + std::sin(k*angle)*z* (1/std::sin(angle)));
+    }
+
+    /*float angle = std::acos(q0.x*q1.x + q0.y*q1.y + q0.z*q1.z + q0.t*q1.t);
     float k0 = std::sin((1-k)*angle) / std::sin(angle);
     float k1 = std::sin(k*angle) / std::sin(angle);
     Quat qi = ((q0*k0) + (q1*k1)).normalize();
-    return qi;
+    return qi;*/
 }
 
 std::ostream& operator<<(std::ostream &os, const Quat& v){

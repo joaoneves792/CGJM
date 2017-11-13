@@ -73,18 +73,6 @@ void SceneNode::rotate(float x, float y, float z, float angle) {
     orientation = Quat(angle, Vec3(x, y, z)) * orientation;
 }
 
-void SceneNode::lerpPosition(float x, float y, float z, float c) {
-    //TODO
-}
-
-void SceneNode::lerpOrientation(float x, float y, float z, float angle, float c) {
-    //TODO
-}
-
-void SceneNode::lerpOrientation(Quat q, float c) {
-    //TODO
-}
-
 void SceneNode::scale(float x, float y, float z) {
     size = Vec3(x, y, z);
 }
@@ -142,6 +130,10 @@ Quat SceneNode::getOrientation() {
 
 Mat4 SceneNode::getModelMatrix() {
         return getTranslation()*getOrientation().GLMatrix().transpose()*getScale();
+}
+
+void SceneNode::hidden(bool b) {
+    visible = !b;
 }
 
 void SceneNode::draw(SceneGraph *scene) {

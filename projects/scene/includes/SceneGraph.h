@@ -57,6 +57,8 @@ public:
     void addChild(SceneNode* child);
     void destroy();
 
+    void hidden(bool b);
+
     void update(int dt);
     void draw(SceneGraph* scene);
 

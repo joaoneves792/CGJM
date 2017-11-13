@@ -74,6 +74,8 @@ void update(){
     if(WASD[Q] || WASD[E]) {
 		scene->getCamera()->changeOrientation(0.0f, 0.0f, ((WASD[Q])?-1:1)*(timeDelta*movementRate));
     }
+
+    updateScene(timeDelta);
     
 }
 
@@ -88,7 +90,8 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-    scene->getCamera()->perspective((float)M_PI/4, (WinX/WinY), 0.1, 10);
+    scene->getCamera()->perspective((float)M_PI/4, (WinX/WinY), 0.1, 100);
+	//scene->getCamera()->ortho(-2, 2, -2, 2, 0, 10);
 }
 
 void timer(int value)
