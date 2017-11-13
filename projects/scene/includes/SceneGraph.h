@@ -7,11 +7,7 @@
 
 #include <functional>
 #include <list>
-#include "vec.h"
-#include "mat.h"
-#include "quat.h"
-#include "Camera.h"
-
+#include "CGJengine.h"
 
 class SceneGraph;
 
@@ -65,6 +61,11 @@ public:
     void draw(SceneGraph* scene);
 
     Mat4 getModelMatrix();
+
+private:
+    Mat4 getTranslation();
+    Quat getOrientation();
+    Mat4 getScale();
 };
 
 class SceneGraph{
@@ -80,6 +81,9 @@ public:
 
     Mat4 getViewMatrix();
     Mat4 getProjectionMatrix();
+
+    Camera* getCamera();
+    SceneNode* getRoot();
 
     void update(int dt);
     void draw();

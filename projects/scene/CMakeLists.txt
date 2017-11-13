@@ -16,6 +16,7 @@ set(SOURCE_FILES
 		src/FreeCamera.cpp src/Camera.cpp src/SceneGraph.cpp)
 set(TEST_FILES
 		tests/scene_viewer.cpp
+		tests/scene.cpp
 		)
 
 add_executable(scene_viewer ${SOURCE_FILES} ${TEST_FILES})

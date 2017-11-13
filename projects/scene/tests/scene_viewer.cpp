@@ -5,25 +5,11 @@
 #include "GL/glew.h"
 #include "GL/freeglut.h"
 
-#include "glerrors.h"
-#include "Shader.h"
+#include "CGJengine.h"
+#include "scene.h"
 
-
-#include "vec.h"
-#include "mat.h"
-#include "quat.h"
-
-#include "OBJMesh.h"
-#include "Camera.h"
-#include "SphereCamera.h"
-#include "FreeCamera.h"
-#include "SceneGraph.h"
 
 #define CAPTION "SCENE VIEWER (Press ESC to quit)"
-
-#ifndef M_PI
-#define M_PI 3.14159265359f
-#endif
 
 int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;
@@ -44,182 +30,20 @@ unsigned char WASD[6];
 int mouseX = WinX/2;
 int mouseY = WinY/2;
 
-Camera* camera;
 SceneGraph* scene;
 
-std::vector<OBJMesh*> meshes;
-std::vector<Shader*> shaders;
-
-/////////////////////////////////////////////////////////////////////// SCENE
-void setupScene(){
-    camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
-    //camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
-
-    auto rootNode = new SceneNode();
-    scene = new SceneGraph(camera, rootNode);
-
-    //Load Models
-    auto cube = new OBJMesh("res/cube_vn.obj");
-    meshes.push_back(cube);
-    auto triangle = new OBJMesh("res/triangle_rot.obj");
-    meshes.push_back(triangle);
-    auto square = new OBJMesh("res/square_rot.obj");
-    meshes.push_back(square);
-    auto parallelogram = new OBJMesh("res/parallelogram_rot.obj");
-    meshes.push_back(parallelogram);
-
-    //Load Shaders
-    auto cubeShader = new Shader("res/cube_vs.glsl", "res/cube_fs.glsl");
-    shaders.push_back(cubeShader);
-    cubeShader->setAttribLocation("inPosition", VERTICES__ATTR);
-    cubeShader->setAttribLocation("inTexcoord", TEXCOORDS_ATTR);
-    cubeShader->setAttribLocation("inNormal", NORMALS__ATTR);
-    cubeShader->link();
-    cubeShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
-        GLint uniformLocation = cubeShader->getUniformLocation("MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
-    });
-
-    auto tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
-    shaders.push_back(tangramShader);
-    tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
-    tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
-    tangramShader->link();
-    const GLint colorUniform = tangramShader->getUniformLocation("color");
-    tangramShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
-        GLint uniformLocation = tangramShader->getUniformLocation("MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
-    });
-    checkOpenGLError("ERROR: Could not create shaders.");
-
-
-    //Create Nodes
-    auto cubeNode = new SceneNode(cube, cubeShader);
-    rootNode->addChild(cubeNode);
-    cubeNode->translate(0.0f, -1.0f, 0.0f);
-
-    auto squareNode = new SceneNode(square, tangramShader);
-    squareNode->translate(-0.75f, 1.0f, -0.75f);
-    squareNode->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
-    });
-    cubeNode->addChild(squareNode);
-
-    auto parallelogramNode = new SceneNode(parallelogram, tangramShader);
-    parallelogramNode->translate(0.0f, 1.0f, 0.75f);
-    parallelogramNode->setPreDraw([=](){
-            glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
-    });
-    cubeNode->addChild(parallelogramNode);
-
-
-    auto smallTriangle1Node = new SceneNode(triangle, tangramShader);
-    smallTriangle1Node->translate(-0.75f, 1.0f, -0.25f);
-    smallTriangle1Node->rotate(0.0f, 1.0f, 0.0f, M_PI);
-    smallTriangle1Node->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
-    });
-    cubeNode->addChild(smallTriangle1Node);
-
-    auto smallTriangle2Node = new SceneNode(triangle, tangramShader);
-    smallTriangle2Node->translate(-0.25f, 1.0f, 0.25f);
-    smallTriangle2Node->rotate(0.0f, 1.0f, 0.0f, -M_PI/2.0f);
-    smallTriangle2Node->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
-    });
-    cubeNode->addChild(smallTriangle2Node);
-
-    auto mediumTriangleNode = new SceneNode(triangle, tangramShader);
-    mediumTriangleNode->translate(-0.50f, 1.0f, 0.00f);
-    mediumTriangleNode->rotate(0.0f, 1.0f, 0.0f, 5.0f*M_PI/4.0f);
-    mediumTriangleNode->scale(1.414f, 1.414f, 1.414f);
-    mediumTriangleNode->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
-    });
-    cubeNode->addChild(mediumTriangleNode);
-
-    auto largeNode = new SceneNode();
-    largeNode->scale(2.0f, 2.0f, 2.0f);
-    cubeNode->addChild(largeNode);
-
-    auto largeTriangle1Node = new SceneNode(triangle, tangramShader);
-    largeTriangle1Node->translate(0.0f, 1.0f, -0.50f);
-    largeTriangle1Node->rotate(0.0f, 1.0f, 0.0f, -M_PI/2.0f);
-    largeTriangle1Node->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
-    });
-    largeNode->addChild(largeTriangle1Node);
-
-    auto largeTriangle2Node = new SceneNode(triangle, tangramShader);
-    largeTriangle2Node->translate(0.0f, 1.0f, 0.50f);
-    largeTriangle2Node->rotate(0.0f, 1.0f, 0.0f, M_PI/2.0f);
-    largeTriangle2Node->setPreDraw([=](){
-        glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
-    });
-    largeNode->addChild(largeTriangle2Node);
-}
-
-
-void drawScene(){
-    scene->draw();
-    checkOpenGLError("ERROR: Could not draw scene.");
-
-	/*2 Small triangles, 2 big triangles and 1 medium triangle*/
-	/*glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
-	M = CGJM::translate(-0.75f, 0.0f, -0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), M_PI); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();
-
-	glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
-	M = CGJM::translate(-0.50f, 0.0f, 0.0f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), 5*M_PI/4)*CGJM::scale(1.414f, 1.414f, 1.414f); //Medium
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();
-
-	glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
-	M = CGJM::translate(0.0f, 0.00f, -0.5f)*CGJM::rotate(Vec3(0.0f,1.0f, 0.0f), -M_PI/2)*CGJM::scale(2.0f, 2.0f, 2.0f);//Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();
-
-	glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
-	M = CGJM::translate(0.0f, 0.00f, 0.5f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), M_PI/2)*CGJM::scale(2.0f, 2.0f, 2.0f); //Big
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();
-
-	glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
-	M = CGJM::translate(-0.25f, 0.0f, 0.25f)*CGJM::rotate(Vec3(0.0f, 1.0f, 0.0f), -M_PI/2.0f); //Small
-	glUniformMatrix4fv(MVPUniform, 1, GL_FALSE, (VP*M).transpose());
-	triangle->draw();*/
-}
-
 /////////////////////////////////////////////////////////////////////// CALLBACKS
-
 void cleanup()
 {
-    //Destroy meshes
-    for(OBJMesh* m : meshes){
-        m->unload();
-        delete m;
-    }
-    meshes.clear();
-
-    //Destroy shaders
-    glUseProgram(0);
-    for(Shader* s: shaders){
-        delete s;
-    }
-    checkOpenGLError("ERROR: Could not destroy shaders.");
-
-    scene->destroy();
-
-    //Destroy the camera
-    delete camera;
+	destroyScene(scene);
 }
 
 void display()
 {
 	++FrameCount;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	drawScene();
+	scene->draw();
+	checkOpenGLError("ERROR: Could not draw scene.");
 	glutSwapBuffers();
 }
 
@@ -233,22 +57,22 @@ void update(){
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
     if(WASD[W]){
-		camera->move(0.0f, 0.0f, -(timeDelta*movementRate));
+		scene->getCamera()->move(0.0f, 0.0f, -(timeDelta*movementRate));
     }
 	if(WASD[A]){
-		camera->move(-timeDelta*movementRate, 0.0f, 0.0f);
+		scene->getCamera()->move(-timeDelta*movementRate, 0.0f, 0.0f);
 	}
     if(WASD[S]){
-		camera->move(0.0f, 0.0f, timeDelta*movementRate);
+		scene->getCamera()->move(0.0f, 0.0f, timeDelta*movementRate);
     }
 	if(WASD[D]){
-		camera->move(timeDelta*movementRate, 0.0f, 0.0f);
+		scene->getCamera()->move(timeDelta*movementRate, 0.0f, 0.0f);
 	}
 
 
     /*Update camera roll*/
     if(WASD[Q] || WASD[E]) {
-		camera->changeOrientation(0.0f, 0.0f, ((WASD[Q])?-1:1)*(timeDelta*movementRate));
+		scene->getCamera()->changeOrientation(0.0f, 0.0f, ((WASD[Q])?-1:1)*(timeDelta*movementRate));
     }
     
 }
@@ -264,7 +88,7 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
-    camera->perspective((float)M_PI/4, (WinX/WinY), 0.1, 10);
+    scene->getCamera()->perspective((float)M_PI/4, (WinX/WinY), 0.1, 10);
 }
 
 void timer(int value)
@@ -289,7 +113,7 @@ void mouseTimer(int value)
 	mouseX = WinX / 2;
 	mouseY = WinY / 2;
 	
-	camera->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
+	scene->getCamera()->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
     glutTimerFunc(10, mouseTimer, 0);
 }
 
@@ -427,8 +251,8 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
-	setupCallbacks();
-    setupScene();
+    setupCallbacks();
+    scene = setupScene();
 
     WASD[W] = 0;
     WASD[A] = 0;

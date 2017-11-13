@@ -117,16 +117,31 @@ void SceneNode::update(int dt) {
         n->update(dt);
 }
 
+Mat4 SceneNode::getTranslation() {
+    if(parent == nullptr)
+        return CGJM::translate(position[0], position[1], position[2]);
+    else
+        return CGJM::translate(position[0], position[1], position[2]) *
+               parent->getTranslation();
+}
+
+Mat4 SceneNode::getScale() {
+    if(parent == nullptr)
+        return CGJM::scale(size[0], size[1], size[2]);
+    else
+        return CGJM::scale(size[0], size[1], size[2])*
+               parent->getScale();
+}
+
+Quat SceneNode::getOrientation() {
+    if(parent == nullptr)
+        return orientation;
+    else
+        return orientation * parent->getOrientation();
+}
+
 Mat4 SceneNode::getModelMatrix() {
-   if(parent == nullptr)
-       return CGJM::translate(position[0], position[1], position[2])*
-               orientation.GLMatrix().transpose()*
-               CGJM::scale(size[0], size[1], size[2]);
-   else
-       return CGJM::translate(position[0], position[1], position[2]) *
-               orientation.GLMatrix().transpose() *
-               parent->getModelMatrix()*
-               CGJM::scale(size[0], size[1], size[2]);
+        return getTranslation()*getOrientation().GLMatrix().transpose()*getScale();
 }
 
 void SceneNode::draw(SceneGraph *scene) {
@@ -212,6 +227,14 @@ Mat4 SceneGraph::getViewMatrix() {
         return camera->getViewMatrix();
     else
         return Mat4(1);
+}
+
+Camera* SceneGraph::getCamera() {
+    return camera;
+}
+
+SceneNode* SceneGraph::getRoot() {
+    return root;
 }
 
 void SceneGraph::update(int dt) {
