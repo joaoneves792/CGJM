@@ -20,7 +20,7 @@ extern keyframe box[];
 
 /////////////////////////////////////////////////////////////////////// SCENE
 SceneGraph* setupScene(){
-    auto camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
+    auto camera = new SphereCamera(10.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
     //auto camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 
     auto rootNode = new SceneNode("root");

@@ -9,6 +9,10 @@ in float transparency_from_vshader;
 
 out vec4 outColor;
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
 void main(void){
     vec3 baseColor = vec3(0.61568, 0.33725, 0.0);
     //vec3 baseColor = vec3(157, 86, 0.0);
@@ -28,6 +32,12 @@ void main(void){
 	vec3 R = reflect(-l, n);
 	float cosAlpha = clamp( dot(E,R), 0.0,1.0);
     float cosTheta = clamp( dot(n,l), 0.0,1.0);
+
+	baseColor.rgb = baseColor.rgb * rand(floor(200*fragmentPosition.xz));
+	baseColor.r = clamp(baseColor.r, 0.2f, baseColor.r);
+	baseColor.g = clamp(baseColor.r, 0.2f, baseColor.g);
+
+
 
 	outColor.rgb = baseColor * lightColor.xyz * abs(lightColor.w) * cosTheta +
 		lightColor.xyz * abs(lightColor.w) * pow(cosAlpha, 5.0);

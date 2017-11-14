@@ -14,7 +14,8 @@ void main(void){
     }
 
     if(length(pos2d)<0.25f){
-        color = 0.0f;
+        out_Color = vec4(0.3f, 0.0f, 0.0f, 1.0f);
+        return;
     }
     out_Color = vec4(color, color, color, 1.0f);
 }
