@@ -14,7 +14,7 @@ SceneNode::SceneNode(std::string name) {
     mesh = nullptr;
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
-    orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    orientation = Quat(1.0f, 0.0f, 0.0f, 0.0f);
     size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;
@@ -27,7 +27,8 @@ SceneNode::SceneNode(std::string name, OBJMesh *mesh) {
     this->mesh = mesh;
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
-    orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    orientation = Quat(1.0f, 0.0f, 0.0f, 0.0f);
+    //orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
     size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;
@@ -40,7 +41,8 @@ SceneNode::SceneNode(std::string name, OBJMesh *mesh, Shader *shader) {
     this->mesh = mesh;
     this->shader = shader;
     position = Vec3(0.0f, 0.0f, 0.0f);
-    orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    //orientation = Quat(0, Vec3(0.0f, 1.0f, 0.0f));
+    orientation = Quat(1.0f, 0.0f, 0.0f, 0.0f);
     size = Vec3(1.0f, 1.0f, 1.0f);
     parent = nullptr;
     pre_draw = nullptr;

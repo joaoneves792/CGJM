@@ -10,7 +10,7 @@
 #include "animation.h"
 
 
-#define CAPTION "SCENE VIEWER (Press ESC to quit)"
+#define CAPTION "SCENE VIEWER (ESC:quit F:Animate ARROWS:Move WASDQE:Camera)"
 
 int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;

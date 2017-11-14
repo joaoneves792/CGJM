@@ -27,6 +27,8 @@ SceneGraph* setupScene(){
     auto scene = new SceneGraph(camera, rootNode);
 
     //Load Models
+    auto floor = new OBJMesh("res/floor.obj");
+    meshes.push_back(floor);
     auto cube = new OBJMesh("res/cube_vn.obj");
     meshes.push_back(cube);
     auto triangle = new OBJMesh("res/triangle_rot.obj");
@@ -48,6 +50,15 @@ SceneGraph* setupScene(){
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
     });
 
+    auto floorShader = new Shader("res/floorv.glsl", "res/floorf.glsl");
+    shaders.push_back(floorShader);
+    floorShader->setAttribLocation("inPosition", VERTICES__ATTR);
+    floorShader->link();
+    floorShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
+        int uniformLocation = floorShader->getUniformLocation("MVP");
+        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
+    });
+
     auto tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
     shaders.push_back(tangramShader);
     tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
@@ -64,7 +75,9 @@ SceneGraph* setupScene(){
     //Create Nodes
     auto cubeNode = new SceneNode("cube", cube, cubeShader);
     rootNode->addChild(cubeNode);
-    cubeNode->translate(0.0f, -1.0f, -1.0f);
+
+    auto floorNode = new SceneNode("floor", floor, floorShader);
+    rootNode->addChild(floorNode);
 
     auto squareNode = new SceneNode("square", square, tangramShader);
     squareNode->setPreDraw([=](){
