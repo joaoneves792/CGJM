@@ -3,13 +3,15 @@
 //
 
 #include "OBJMesh.h"
-
+#include <iomanip> // setprecision
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <OBJMesh.h>
+#include <unordered_map>
+#include <list>
 
 OBJMesh::OBJMesh() =default;
 
@@ -101,11 +103,76 @@ void OBJMesh::freeMeshData() {
 
 
 void prepareGroup(objGroup* group){
+    const int PRECISION = 5;
     glGenVertexArrays(1, &(group->vao));
     glBindVertexArray(group->vao);
     {
 
-        /*TODO Dumb code -> make proper use of indexes to avoid duplicate vertexes*/
+        /*Identify unique vertexes (same pos/nomals/texcoords) and get them on a vector*/
+
+        /*First put them in a hashtable to check for uniqueness*/
+        unsigned int currentIndex = 0;
+
+        auto uniqueFaces = new objUniqueFace[group->faces.size()];
+        unsigned int faceIndex = 0;
+
+        std::unordered_map<std::string, objUniqueVertex*> map;
+        for(objFace* f: group->faces){
+            for(int i=0; i<3; i++){
+                objVertex* v = group->vertices[f->vertices[i]-1];
+                objNormal* n;
+                objTexCoord* t;
+                std::stringstream stream;
+                stream << std::fixed << std::setprecision(PRECISION) <<
+                       v->vertex[0] << ":" << v->vertex[1] << ":" << v->vertex[2];
+                if(!group->normals.empty()) {
+                    n = group->normals[f->normals[i]-1];
+                    stream << std::fixed << std::setprecision(PRECISION) << "/" <<
+                           n->normal[0] << ":" << n->normal[1] << ":" << n->normal[2];
+                }
+                if(!group->texCoords.empty()){
+                    t = group->texCoords[f->texCoords[i]-1];
+                    stream << std::fixed << std::setprecision(PRECISION) << "/" <<
+                           t->uv[0] << ":" << t->uv[1];
+                }
+                std::string s = stream.str();
+
+                auto search = map.find(s);
+                if(search != map.end()) {
+                    //Found an exact same vertex place its index in the face
+                    uniqueFaces[faceIndex].indexes[i] = search->second->index;
+                }else{
+                    //No matching vertex found create it and assign it to the unique face
+                    auto uniqueVertex = new objUniqueVertex;
+                    uniqueVertex->vertex[0] = v->vertex[0];
+                    uniqueVertex->vertex[1] = v->vertex[1];
+                    uniqueVertex->vertex[2] = v->vertex[2];
+                    if(!group->normals.empty()) {
+                        uniqueVertex->normal[0] = n->normal[0];
+                        uniqueVertex->normal[1] = n->normal[1];
+                        uniqueVertex->normal[2] = n->normal[2];
+                    }
+                    if(!group->texCoords.empty()){
+                        uniqueVertex->texCoord[0] = t->uv[0];
+                        uniqueVertex->texCoord[1] = t->uv[1];
+                    }
+                    uniqueVertex->index = currentIndex;
+                    uniqueFaces[faceIndex].indexes[i] = currentIndex;
+                    currentIndex++;
+                }
+            }
+            faceIndex++;
+        }
+
+
+        /*Now put them in a list and sort them*/
+        std::list<objUniqueVertex*> uniqueVertexList;
+        for(auto it = map.begin(); it!= map.end(); it++){
+            uniqueVertexList.push_back(it->second);
+        }
+        uniqueVertexList.sort([](const objUniqueVertex* a, const objUniqueVertex* b){ return (a->index < b->index);});
+
+        /*TODO see libhobby3d code on how to efficiently upload the stuff we have now*/
 
         auto vertices  = new GLfloat[group->faces.size()*3*3];
         auto normals   = new GLfloat[group->faces.size()*3*3];

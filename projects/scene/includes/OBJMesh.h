@@ -21,6 +21,13 @@ typedef struct {
     float vertex[3];
 } objVertex;
 
+typedef struct{
+    float vertex[3];
+    float normal[3];
+    float texCoord[2];
+    unsigned int index;
+}objUniqueVertex;
+
 typedef struct {
     float normal[3];
 } objNormal;
@@ -34,6 +41,10 @@ typedef struct {
     unsigned int normals[3];
     unsigned int texCoords[3];
 } objFace;
+
+typedef struct {
+    unsigned int indexes[3];
+}objUniqueFace;
 
 typedef struct {
     std::vector<objVertex*> vertices;
