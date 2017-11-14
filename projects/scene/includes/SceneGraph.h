@@ -7,12 +7,14 @@
 
 #include <functional>
 #include <list>
+#include <string>
 #include "CGJengine.h"
 
 class SceneGraph;
 
 class SceneNode{
 private:
+    std::string name;
     OBJMesh* mesh;
     Shader* shader;
     Vec3 position;
@@ -28,9 +30,11 @@ private:
     std::function<void()> post_draw;
 
 public:
-    SceneNode();
-    SceneNode(OBJMesh* mesh);
-    SceneNode(OBJMesh* mesh, Shader* shader);
+    SceneNode(std::string name);
+    SceneNode(std::string name, OBJMesh* mesh);
+    SceneNode(std::string name, OBJMesh* mesh, Shader* shader);
+
+    std::string getName();
 
     void setMesh(OBJMesh* mesh);
     void setShader(Shader* shader);
@@ -41,15 +45,7 @@ public:
     void setOrientation(float x, float y, float z, float angle);
     void setOrientation(Quat quat);
     void rotate(float x, float y, float z, float angle);
-
-    void lerpPosition(float x, float y, float z, float c);
-    void lerpOrientation(float x, float y, float z, float angle, float c);
-    void lerpOrientation(Quat q, float c);
-
     void scale(float x, float y, float z);
-
-    /*void setPreDraw(void(*callback)());
-    void setPostDraw(void(*callback)());*/
 
     void setPreDraw(std::function<void()> callback);
     void setPostDraw(std::function<void()> callback);
@@ -63,6 +59,8 @@ public:
     void draw(SceneGraph* scene);
 
     Mat4 getModelMatrix();
+
+    SceneNode* findNode(std::string& name);
 
 private:
     Mat4 getTranslation();
@@ -86,6 +84,8 @@ public:
 
     Camera* getCamera();
     SceneNode* getRoot();
+
+    SceneNode* findNode(std::string& name);
 
     void update(int dt);
     void draw();

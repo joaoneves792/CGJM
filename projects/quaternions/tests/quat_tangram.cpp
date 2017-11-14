@@ -38,7 +38,7 @@ Shader* shaderProgram;
 #define Q 4
 #define E 5
 #define ESCAPE 27
-unsigned char WASD[6];
+unsigned char keyboardStatus[6];
 int mouseX = WinX/2;
 int mouseY = WinY/2;
 float cameraDistance = 5.0f;
@@ -412,18 +412,18 @@ void update(){
 
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
-    if(WASD[W]){
+    if(keyboardStatus[W]){
 		cameraDistance -= (timeDelta*movementRate);
     }
-    if(WASD[S]){
+    if(keyboardStatus[S]){
 		cameraDistance += (timeDelta*movementRate);
     }
 
 
     /*Update camera roll*/
-    if(WASD[Q] || WASD[E]) {
-        cameraRoll += ((WASD[Q])?-1:1)*(timeDelta*movementRate);
-		cameraOrientation = Quat(((WASD[Q])?-1:1)*(timeDelta*movementRate), front) * cameraOrientation;
+    if(keyboardStatus[Q] || keyboardStatus[E]) {
+        cameraRoll += ((keyboardStatus[Q])?-1:1)*(timeDelta*movementRate);
+		cameraOrientation = Quat(((keyboardStatus[Q])?-1:1)*(timeDelta*movementRate), front) * cameraOrientation;
     }
     
 }
@@ -477,22 +477,22 @@ void mouseTimer(int value)
 void keyboard(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[W] = key;
+            keyboardStatus[W] = key;
             return;
         case 'a':
-            WASD[A] = key;
+            keyboardStatus[A] = key;
             return;
         case 's':
-            WASD[S] = key;
+            keyboardStatus[S] = key;
             return;
         case 'd':
-            WASD[D] = key;
+            keyboardStatus[D] = key;
             return;
         case 'q':
-            WASD[Q] = key;
+            keyboardStatus[Q] = key;
             return;
         case 'e':
-            WASD[E] = key;
+            keyboardStatus[E] = key;
             return;
 		case 'p':
 			perspectiveProjection = !perspectiveProjection;
@@ -512,22 +512,22 @@ void keyboard(unsigned char key, int x, int y){
 void keyboardUp(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[W] = 0;
+            keyboardStatus[W] = 0;
             return;
         case 'a':
-            WASD[A] = 0;
+            keyboardStatus[A] = 0;
             return;
         case 's':
-            WASD[S] = 0;
+            keyboardStatus[S] = 0;
             return;
         case 'd':
-            WASD[D] = 0;
+            keyboardStatus[D] = 0;
             return;
         case 'q':
-            WASD[Q] = 0;
+            keyboardStatus[Q] = 0;
             return;
         case 'e':
-            WASD[E] = 0;
+            keyboardStatus[E] = 0;
             return;
         default:
             return;
@@ -620,12 +620,12 @@ void init(int argc, char* argv[])
 	createBufferObjects(square);
 	createBufferObjects(parallelogram);
 	setupCallbacks();
-    WASD[W] = 0;
-    WASD[A] = 0;
-    WASD[S] = 0;
-    WASD[D] = 0;
-    WASD[Q] = 0;
-    WASD[E] = 0;
+    keyboardStatus[W] = 0;
+    keyboardStatus[A] = 0;
+    keyboardStatus[S] = 0;
+    keyboardStatus[D] = 0;
+    keyboardStatus[Q] = 0;
+    keyboardStatus[E] = 0;
 }
 
 int main(int argc, char* argv[])

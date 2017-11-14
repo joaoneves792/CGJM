@@ -9,7 +9,8 @@
 #include "quat.h"
 #include "mat.h"
 
-SceneNode::SceneNode() {
+SceneNode::SceneNode(std::string name) {
+    this->name = name;
     mesh = nullptr;
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
@@ -21,7 +22,8 @@ SceneNode::SceneNode() {
     visible = true;
 }
 
-SceneNode::SceneNode(OBJMesh *mesh) {
+SceneNode::SceneNode(std::string name, OBJMesh *mesh) {
+    this->name = name;
     this->mesh = mesh;
     shader = nullptr;
     position = Vec3(0.0f, 0.0f, 0.0f);
@@ -33,7 +35,8 @@ SceneNode::SceneNode(OBJMesh *mesh) {
     visible = true;
 }
 
-SceneNode::SceneNode(OBJMesh *mesh, Shader *shader) {
+SceneNode::SceneNode(std::string name, OBJMesh *mesh, Shader *shader) {
+    this->name = name;
     this->mesh = mesh;
     this->shader = shader;
     position = Vec3(0.0f, 0.0f, 0.0f);
@@ -43,6 +46,10 @@ SceneNode::SceneNode(OBJMesh *mesh, Shader *shader) {
     pre_draw = nullptr;
     post_draw = nullptr;
     visible = true;
+}
+
+std::string SceneNode::getName() {
+    return name;
 }
 
 void SceneNode::setMesh(OBJMesh *mesh) {
@@ -134,6 +141,17 @@ Mat4 SceneNode::getModelMatrix() {
 
 void SceneNode::hidden(bool b) {
     visible = !b;
+}
+
+SceneNode* SceneNode::findNode(std::string &name) {
+    if(name == this->name)
+        return this;
+    for(SceneNode* n: childs){
+        SceneNode* found = n->findNode(name);
+        if(found != nullptr)
+            return found;
+    }
+    return nullptr;
 }
 
 void SceneNode::draw(SceneGraph *scene) {
@@ -237,4 +255,8 @@ void SceneGraph::update(int dt) {
 void SceneGraph::draw(){
     if(root != nullptr)
         root->draw(this);
+}
+
+SceneNode* SceneGraph::findNode(std::string& name) {
+    return root->findNode(name);
 }

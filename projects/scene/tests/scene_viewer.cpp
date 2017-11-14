@@ -7,6 +7,7 @@
 
 #include "CGJengine.h"
 #include "scene.h"
+#include "animation.h"
 
 
 #define CAPTION "SCENE VIEWER (Press ESC to quit)"
@@ -25,8 +26,13 @@ unsigned int FrameCount = 0;
 #define D 3
 #define Q 4
 #define E 5
+#define UP 6
+#define DOWN 7
+#define RIGHT 8
+#define LEFT 9
+
 #define ESCAPE 27
-unsigned char WASD[6];
+unsigned char keyboardStatus[10];
 int mouseX = WinX/2;
 int mouseY = WinY/2;
 
@@ -56,23 +62,38 @@ void update(){
 
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
-    if(WASD[W]){
+    if(keyboardStatus[W]){
 		scene->getCamera()->move(0.0f, 0.0f, -(timeDelta*movementRate));
     }
-	if(WASD[A]){
+	if(keyboardStatus[A]){
 		scene->getCamera()->move(-timeDelta*movementRate, 0.0f, 0.0f);
 	}
-    if(WASD[S]){
+    if(keyboardStatus[S]){
 		scene->getCamera()->move(0.0f, 0.0f, timeDelta*movementRate);
     }
-	if(WASD[D]){
+	if(keyboardStatus[D]){
 		scene->getCamera()->move(timeDelta*movementRate, 0.0f, 0.0f);
 	}
 
+    std::string movingNodeName = "cube";
+    SceneNode* movingNode = scene->findNode(movingNodeName);
+
+    if(keyboardStatus[UP] && movingNode != nullptr){
+        movingNode->translate(0.0f, 0.0f, -(timeDelta*movementRate));
+    }
+    if(keyboardStatus[DOWN] && movingNode != nullptr){
+        movingNode->translate(0.0f, 0.0f, (timeDelta*movementRate));
+    }
+    if(keyboardStatus[LEFT] && movingNode != nullptr){
+        movingNode->translate(-(timeDelta*movementRate), 0.0f, 0.0f);
+    }
+    if(keyboardStatus[RIGHT] && movingNode != nullptr){
+        movingNode->translate((timeDelta*movementRate), 0.0f, 0.0f);
+    }
 
     /*Update camera roll*/
-    if(WASD[Q] || WASD[E]) {
-		scene->getCamera()->changeOrientation(0.0f, 0.0f, ((WASD[Q])?-1:1)*(timeDelta*movementRate));
+    if(keyboardStatus[Q] || keyboardStatus[E]) {
+		scene->getCamera()->changeOrientation(0.0f, 0.0f, ((keyboardStatus[Q])?-1:1)*(timeDelta*movementRate));
     }
 
     updateScene(timeDelta);
@@ -123,22 +144,25 @@ void mouseTimer(int value)
 void keyboard(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[W] = key;
+            keyboardStatus[W] = key;
             return;
         case 'a':
-            WASD[A] = key;
+            keyboardStatus[A] = key;
             return;
         case 's':
-            WASD[S] = key;
+            keyboardStatus[S] = key;
             return;
         case 'd':
-            WASD[D] = key;
+            keyboardStatus[D] = key;
             return;
         case 'q':
-            WASD[Q] = key;
+            keyboardStatus[Q] = key;
             return;
         case 'e':
-            WASD[E] = key;
+            keyboardStatus[E] = key;
+            return;
+        case 'f':
+            animate();
             return;
         case ESCAPE:
             glutLeaveMainLoop();
@@ -151,23 +175,61 @@ void keyboard(unsigned char key, int x, int y){
 void keyboardUp(unsigned char key, int x, int y){
     switch(key){
         case 'w':
-            WASD[W] = 0;
+            keyboardStatus[W] = 0;
             return;
         case 'a':
-            WASD[A] = 0;
+            keyboardStatus[A] = 0;
             return;
         case 's':
-            WASD[S] = 0;
+            keyboardStatus[S] = 0;
             return;
         case 'd':
-            WASD[D] = 0;
+            keyboardStatus[D] = 0;
             return;
         case 'q':
-            WASD[Q] = 0;
+            keyboardStatus[Q] = 0;
             return;
         case 'e':
-            WASD[E] = 0;
+            keyboardStatus[E] = 0;
             return;
+        default:
+            return;
+    }
+}
+
+void specialKeyboard(int key, int x, int y){
+    switch(key){
+        case GLUT_KEY_UP:
+            keyboardStatus[UP] = 1;
+            break;
+        case GLUT_KEY_DOWN:
+            keyboardStatus[DOWN] = 1;
+            break;
+        case GLUT_KEY_LEFT:
+            keyboardStatus[LEFT] = 1;
+            break;
+        case GLUT_KEY_RIGHT:
+            keyboardStatus[RIGHT] = 1;
+            break;
+        default:
+            return;
+    }
+}
+
+void specialKeyboardUp(int key, int x, int y){
+    switch(key){
+        case GLUT_KEY_UP:
+            keyboardStatus[UP] = 0;
+            break;
+        case GLUT_KEY_DOWN:
+            keyboardStatus[DOWN] = 0;
+            break;
+        case GLUT_KEY_LEFT:
+            keyboardStatus[LEFT] = 0;
+            break;
+        case GLUT_KEY_RIGHT:
+            keyboardStatus[RIGHT] = 0;
+            break;
         default:
             return;
     }
@@ -191,6 +253,8 @@ void setupCallbacks()
 	glutPassiveMotionFunc(mouse);
 	glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
+    glutSpecialFunc(specialKeyboard);
+    glutSpecialUpFunc(specialKeyboardUp);
 }
 
 void checkOpenGLInfo()
@@ -257,12 +321,16 @@ void init(int argc, char* argv[])
     setupCallbacks();
     scene = setupScene();
 
-    WASD[W] = 0;
-    WASD[A] = 0;
-    WASD[S] = 0;
-    WASD[D] = 0;
-    WASD[Q] = 0;
-    WASD[E] = 0;
+    keyboardStatus[W] = 0;
+    keyboardStatus[A] = 0;
+    keyboardStatus[S] = 0;
+    keyboardStatus[D] = 0;
+    keyboardStatus[Q] = 0;
+    keyboardStatus[E] = 0;
+    keyboardStatus[UP] = 0;
+    keyboardStatus[DOWN] = 0;
+    keyboardStatus[LEFT] = 0;
+    keyboardStatus[RIGHT] = 0;
 }
 
 int main(int argc, char* argv[])

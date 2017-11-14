@@ -5,9 +5,7 @@
 #ifndef CGJM_SCENE_H
 #define CGJM_SCENE_H
 
-#ifndef M_PI
-#define M_PI 3.14159265359f
-#endif
+#include "animation.h"
 
 #define TANGRAM_PIECES_COUNT 7
 
@@ -21,16 +19,9 @@ enum tangram{
     tan_l_triangle2 = 6
 };
 
-typedef struct {
-    float position[3];
-    float angle;
-}keyframe;
-
 
 
 SceneGraph* setupScene();
-void switchKeyframe(keyframe* kf);
-void updateScene(int dt);
 void destroyScene(SceneGraph* scene);
 
 #endif //CGJM_SCENE_H

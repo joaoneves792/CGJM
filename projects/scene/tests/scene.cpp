@@ -4,73 +4,26 @@
 
 #include "CGJengine.h"
 #include "scene.h"
+#include "animation.h"
 
 #define interpolate(v1, v2, t)  (1 - t) * v1 + t * v2
 
 std::vector<OBJMesh*> meshes;
 std::vector<Shader*> shaders;
 
-
-keyframe original[TANGRAM_PIECES_COUNT] = {
-        {-0.75f, 1.0f, -0.75f, 0.0f}, //square
-        {0.0f,   1.0f, 0.75f,  0.0f}, //parallelogram
-        {-0.75f, 1.0f, -0.25f, M_PI}, //small tri 1
-        {-0.25f, 1.0f, 0.25f,  -M_PI / 2.0f}, //small tri 2
-        {-0.50f, 1.0f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
-        {0.0f,   1.0f, -0.50f, -M_PI / 2.0f}, //large tri 1
-        {0.0f,   1.0f, 0.50f,  M_PI / 2.0f} //large tri 2
-};
-keyframe floating[TANGRAM_PIECES_COUNT] = {
-        {-0.75f, 1.00f, -0.75f, 0.0f}, //square
-        {0.0f,   1.50f, 0.75f,  0.0f}, //parallelogram
-        {-0.75f, 2.00f, -0.25f, M_PI}, //small tri 1
-        {-0.25f, 2.50f, 0.25f,  -M_PI / 2.0f}, //small tri 2
-        {-0.50f, 3.00f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
-        {0.0f,   3.50f, -0.50f, -M_PI / 2.0f}, //large tri 1
-        {0.0f,   4.00f, 0.50f,  M_PI / 2.0f} //large tri 2
-};
-keyframe floatingBox[TANGRAM_PIECES_COUNT] = {
-        {0.00f,   1.00f, -0.06f, M_PI / 4.0f}, //square
-        {0.53f,   1.50f, 0.47f,   -M_PI / 4.0f}, //parallelogram
-        {0.35f,   2.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
-        {-0.355f, 2.50f, -0.415f, -M_PI / 4.0f}, //small tri 2
-        {0.35f,   3.00f, -0.06f, M_PI / 2.0f}, //medium tri
-        {0.0f,    3.50f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
-        {-0.71f,  4.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
-};
-keyframe box[TANGRAM_PIECES_COUNT] = {
-        {0.00f,   1.00f, -0.06f, M_PI / 4.0f}, //square
-        {0.53f,   1.00f, 0.47f,   -M_PI / 4.0f}, //parallelogram
-        {0.35f,   1.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
-        {-0.355f, 1.00f, -0.415f, -M_PI / 4.0f}, //small tri 2
-        {0.35f,   1.00f, -0.06f, M_PI / 2.0f}, //medium tri
-        {0.0f,    1.00f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
-        {-0.71f,  1.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
-};
-
-keyframe* currentKeyframe;
-keyframe* lastKeyframe;
-float keyframeStatus = 1.0f;
-const int KEYFRAME_DURATION = 2000; //in milliseconds
-
-keyframe* animation[8]= {original, floating, floatingBox, box, floatingBox, floating, original};
-
 SceneNode* tangramNodes[TANGRAM_PIECES_COUNT];
 
+extern keyframe original[];
+extern keyframe floating[];
+extern keyframe floatingBox[];
+extern keyframe box[];
+
 /////////////////////////////////////////////////////////////////////// SCENE
-
-void defineKeyframes(){
-}
-
 SceneGraph* setupScene(){
-    currentKeyframe = original;
-    lastKeyframe = original;
-    keyframeStatus = 1.0f;
-
     auto camera = new SphereCamera(5.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
     //auto camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 
-    auto rootNode = new SceneNode();
+    auto rootNode = new SceneNode("root");
     auto scene = new SceneGraph(camera, rootNode);
 
     //Load Models
@@ -109,55 +62,39 @@ SceneGraph* setupScene(){
 
 
     //Create Nodes
-    auto cubeNode = new SceneNode(cube, cubeShader);
+    auto cubeNode = new SceneNode("cube", cube, cubeShader);
     rootNode->addChild(cubeNode);
     cubeNode->translate(0.0f, -1.0f, -1.0f);
 
-    float* position;
-    auto squareNode = new SceneNode(square, tangramShader);
-    position = currentKeyframe[tan_square].position;
-    squareNode->translate(position[0], position[1], position[2]);
-    squareNode->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_square].angle);
+    auto squareNode = new SceneNode("square", square, tangramShader);
     squareNode->setPreDraw([=](){
         glUniform4f(colorUniform, 0.0f, 0.5f, 0.0f, 1.0f);
     });
     cubeNode->addChild(squareNode);
     tangramNodes[tan_square] = squareNode;
 
-    auto parallelogramNode = new SceneNode(parallelogram, tangramShader);
-    position = currentKeyframe[tan_parallelogram].position;
-    parallelogramNode->translate(position[0], position[1], position[2]);
-    parallelogramNode->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_parallelogram].angle);
+    auto parallelogramNode = new SceneNode("parallelogram", parallelogram, tangramShader);
     parallelogramNode->setPreDraw([=](){
             glUniform4f(colorUniform, 1.0f, 1.0f, 0.0f, 1.0f);
     });
     cubeNode->addChild(parallelogramNode);
     tangramNodes[tan_parallelogram] = parallelogramNode;
 
-    auto smallTriangle1Node = new SceneNode(triangle, tangramShader);
-    position = currentKeyframe[tan_s_triangle1].position;
-    smallTriangle1Node->translate(position[0], position[1], position[2]);
-    smallTriangle1Node->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_s_triangle1].angle);
+    auto smallTriangle1Node = new SceneNode("smallTriangle1", triangle, tangramShader);
     smallTriangle1Node->setPreDraw([=](){
         glUniform4f(colorUniform, 0.5f, 0.0f, 0.0f, 1.0f);
     });
     cubeNode->addChild(smallTriangle1Node);
     tangramNodes[tan_s_triangle1] = smallTriangle1Node;
 
-    auto smallTriangle2Node = new SceneNode(triangle, tangramShader);
-    position = currentKeyframe[tan_s_triangle2].position;
-    smallTriangle2Node->translate(position[0], position[1], position[2]);
-    smallTriangle2Node->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_s_triangle2].angle);
+    auto smallTriangle2Node = new SceneNode("smallTriangle2", triangle, tangramShader);
     smallTriangle2Node->setPreDraw([=](){
         glUniform4f(colorUniform, 0.5f, 0.5f, 0.5f, 1.0f);
     });
     cubeNode->addChild(smallTriangle2Node);
     tangramNodes[tan_s_triangle2] = smallTriangle2Node;
 
-    auto mediumTriangleNode = new SceneNode(triangle, tangramShader);
-    position = currentKeyframe[tan_m_triangle].position;
-    mediumTriangleNode->translate(position[0], position[1], position[2]);
-    mediumTriangleNode->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_m_triangle].angle);
+    auto mediumTriangleNode = new SceneNode("mediumTriangle", triangle, tangramShader);
     mediumTriangleNode->scale(1.414f, 1.414f, 1.414f);
     mediumTriangleNode->setPreDraw([=](){
         glUniform4f(colorUniform, 0.0f, 0.2f, 0.5f, 1.0f);
@@ -165,14 +102,11 @@ SceneGraph* setupScene(){
     cubeNode->addChild(mediumTriangleNode);
     tangramNodes[tan_m_triangle] = mediumTriangleNode;
 
-    auto largeNode = new SceneNode();
+    auto largeNode = new SceneNode("largeScaling");
     largeNode->scale(2.0f, 2.0f, 2.0f);
     cubeNode->addChild(largeNode);
 
-    auto largeTriangle1Node = new SceneNode(triangle, tangramShader);
-    position = currentKeyframe[tan_l_triangle1].position;
-    largeTriangle1Node->translate(position[0], position[1], position[2]);
-    largeTriangle1Node->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_l_triangle1].angle);
+    auto largeTriangle1Node = new SceneNode("largeTriangle1", triangle, tangramShader);
     largeTriangle1Node->setPreDraw([=](){
         glUniform4f(colorUniform, 0.0f, 0.5f, 0.5f, 1.0f);
     });
@@ -180,50 +114,19 @@ SceneGraph* setupScene(){
     tangramNodes[tan_l_triangle1] = largeTriangle1Node;
 
 
-    auto largeTriangle2Node = new SceneNode(triangle, tangramShader);
-    position = currentKeyframe[tan_l_triangle2].position;
-    largeTriangle2Node->translate(position[0], position[1], position[2]);
-    largeTriangle2Node->rotate(0.0f, 1.0f, 0.0f, currentKeyframe[tan_l_triangle2].angle);
+    auto largeTriangle2Node = new SceneNode("largeTriangle2", triangle, tangramShader);
     largeTriangle2Node->setPreDraw([=](){
         glUniform4f(colorUniform, 0.5f, 0.5f, 0.0f, 1.0f);
     });
     largeNode->addChild(largeTriangle2Node);
     tangramNodes[tan_l_triangle2] = largeTriangle2Node;
 
+    //Place all parts according to "original" keyframe
+    applyAnimation( original, original, 1.0f);
+
     return scene;
 }
 
-void switchKeyframe(keyframe* kf){
-    lastKeyframe = currentKeyframe;
-    currentKeyframe = kf;
-    keyframeStatus = 0.0f;
-}
-
-void updateScene(int dt){
-    static int k = -1;
-    if(keyframeStatus >= 1.0f) {
-        switchKeyframe(animation[++k]);
-        if(k>=6)
-            k=0;
-        //return;
-    }
-
-    keyframeStatus += (float)dt / (float)KEYFRAME_DURATION;
-    if(keyframeStatus > 1.0f)
-        keyframeStatus = 1.0f;
-
-    for(int i=0; i<TANGRAM_PIECES_COUNT; i++){
-        SceneNode* node = tangramNodes[i];
-        node->setPosition(
-                interpolate(lastKeyframe[i].position[0], currentKeyframe[i].position[0], keyframeStatus),
-                interpolate(lastKeyframe[i].position[1], currentKeyframe[i].position[1], keyframeStatus),
-                interpolate(lastKeyframe[i].position[2], currentKeyframe[i].position[2], keyframeStatus)
-        );
-        Quat prevQuat = Quat(lastKeyframe[i].angle, Vec3(0.0f, 1.0f, 0.0f));
-        Quat nextQuat = Quat(currentKeyframe[i].angle, Vec3(0.0f, 1.0f, 0.0f));
-        node->setOrientation(CGJM::slerp(prevQuat, nextQuat, keyframeStatus));
-    }
-}
 
 void destroyScene(SceneGraph* scene) {
     //Destroy meshes

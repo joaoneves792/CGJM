@@ -13,10 +13,13 @@ include_directories(
 set(SOURCE_FILES
         src/OBJMesh.cpp
 		src/SphereCamera.cpp
-		src/FreeCamera.cpp src/Camera.cpp src/SceneGraph.cpp)
+		src/FreeCamera.cpp
+		src/Camera.cpp
+		src/SceneGraph.cpp)
 set(TEST_FILES
 		tests/scene_viewer.cpp
 		tests/scene.cpp
+		tests/animation.cpp
 		)
 
 add_executable(scene_viewer ${SOURCE_FILES} ${TEST_FILES})
