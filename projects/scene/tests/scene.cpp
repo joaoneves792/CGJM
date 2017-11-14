@@ -46,8 +46,12 @@ SceneGraph* setupScene(){
     tableShader->setAttribLocation("inNormal", NORMALS__ATTR);
     tableShader->link();
     tableShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
-        int uniformLocation = tableShader->getUniformLocation("MVP");
-        glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
+        int MVPLocation = tableShader->getUniformLocation("MVP");
+        glUniformMatrix4fv(MVPLocation, 1, GL_FALSE, (P*V*M).transpose());
+        int ModelLocation = tableShader->getUniformLocation("Model");
+        glUniformMatrix4fv(ModelLocation, 1, GL_FALSE, M.transpose());
+        int ViewLocation = tableShader->getUniformLocation("View");
+        glUniformMatrix4fv(ViewLocation, 1, GL_FALSE, V.transpose());
     });
 
     auto floorShader = new Shader("res/floorv.glsl", "res/floorf.glsl");
@@ -75,10 +79,10 @@ SceneGraph* setupScene(){
     //Create Nodes
     auto tableNode = new SceneNode("table", table, tableShader);
     rootNode->addChild(tableNode);
+    tableNode->translate(0.0f, 2.0f, 0.0f);
 
     auto floorNode = new SceneNode("floor", floor, floorShader);
     rootNode->addChild(floorNode);
-    floorNode->hidden(true);
 
     auto squareNode = new SceneNode("square", square, tangramShader);
     squareNode->setPreDraw([=](){

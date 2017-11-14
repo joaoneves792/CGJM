@@ -9,40 +9,40 @@
 #define interpolate(v1, v2, t)  (1 - t) * v1 + t * v2
 
 keyframe original[TANGRAM_PIECES_COUNT] = {
-        {-0.75f, 1.0f, -0.75f, 0.0f}, //square
-        {0.0f,   1.0f, 0.75f,  0.0f}, //parallelogram
-        {-0.75f, 1.0f, -0.25f, M_PI}, //small tri 1
-        {-0.25f, 1.0f, 0.25f,  -M_PI / 2.0f}, //small tri 2
-        {-0.50f, 1.0f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
-        {0.0f,   1.0f, -0.50f, -M_PI / 2.0f}, //large tri 1
-        {0.0f,   1.0f, 0.50f,  M_PI / 2.0f} //large tri 2
+        {-0.75f, 0.0f, -0.75f, 0.0f}, //square
+        {0.0f,   0.0f, 0.75f,  0.0f}, //parallelogram
+        {-0.75f, 0.0f, -0.25f, M_PI}, //small tri 1
+        {-0.25f, 0.0f, 0.25f,  -M_PI / 2.0f}, //small tri 2
+        {-0.50f, 0.0f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
+        {0.0f,   0.0f, -0.50f, -M_PI / 2.0f}, //large tri 1
+        {0.0f,   0.0f, 0.50f,  M_PI / 2.0f} //large tri 2
 };
 keyframe floating[TANGRAM_PIECES_COUNT] = {
-        {-0.75f, 1.00f, -0.75f, 0.0f}, //square
-        {0.0f,   1.50f, 0.75f,  0.0f}, //parallelogram
-        {-0.75f, 2.00f, -0.25f, M_PI}, //small tri 1
-        {-0.25f, 2.50f, 0.25f,  -M_PI / 2.0f}, //small tri 2
-        {-0.50f, 3.00f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
-        {0.0f,   3.50f, -0.50f, -M_PI / 2.0f}, //large tri 1
-        {0.0f,   4.00f, 0.50f,  M_PI / 2.0f} //large tri 2
+        {-0.75f, 0.00f, -0.75f, 0.0f}, //square
+        {0.0f,   0.50f, 0.75f,  0.0f}, //parallelogram
+        {-0.75f, 1.00f, -0.25f, M_PI}, //small tri 1
+        {-0.25f, 1.50f, 0.25f,  -M_PI / 2.0f}, //small tri 2
+        {-0.50f, 2.00f, 0.0f,   5.0f * M_PI / 4.0f}, //medium tri
+        {0.0f,   2.50f, -0.50f, -M_PI / 2.0f}, //large tri 1
+        {0.0f,   3.00f, 0.50f,  M_PI / 2.0f} //large tri 2
 };
 keyframe floatingBox[TANGRAM_PIECES_COUNT] = {
-        {0.00f,   1.00f, -0.06f, M_PI / 4.0f}, //square
-        {0.53f,   1.50f, 0.47f,   -M_PI / 4.0f}, //parallelogram
-        {0.35f,   2.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
-        {-0.355f, 2.50f, -0.415f, -M_PI / 4.0f}, //small tri 2
-        {0.35f,   3.00f, -0.06f, M_PI / 2.0f}, //medium tri
-        {0.0f,    3.50f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
-        {-0.71f,  4.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
+        {0.00f,   0.00f, -0.06f, M_PI / 4.0f}, //square
+        {0.53f,   0.50f, 0.47f,   -M_PI / 4.0f}, //parallelogram
+        {0.35f,   1.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
+        {-0.355f, 1.50f, -0.415f, -M_PI / 4.0f}, //small tri 2
+        {0.35f,   2.00f, -0.06f, M_PI / 2.0f}, //medium tri
+        {0.0f,    2.50f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
+        {-0.71f,  3.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
 };
 keyframe box[TANGRAM_PIECES_COUNT] = {
-        {0.00f,   1.00f, -0.06f, M_PI / 4.0f}, //square
-        {0.53f,   1.00f, 0.47f,   -M_PI / 4.0f}, //parallelogram
-        {0.35f,   1.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
-        {-0.355f, 1.00f, -0.415f, -M_PI / 4.0f}, //small tri 2
-        {0.35f,   1.00f, -0.06f, M_PI / 2.0f}, //medium tri
-        {0.0f,    1.00f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
-        {-0.71f,  1.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
+        {0.00f,   0.00f, -0.06f, M_PI / 4.0f}, //square
+        {0.53f,   0.00f, 0.47f,   -M_PI / 4.0f}, //parallelogram
+        {0.35f,   0.00f, 0.30f,   5.0f * M_PI / 4.0f}, //small tri 1
+        {-0.355f, 0.00f, -0.415f, -M_PI / 4.0f}, //small tri 2
+        {0.35f,   0.00f, -0.06f, M_PI / 2.0f}, //medium tri
+        {0.0f,    0.00f, 1.00f,   3.0f * M_PI / 4.0f}, //large tri 1
+        {-0.71f,  0.00f, 0.29f,   9.0f * M_PI / 4.0f} //large tri 2
 };
 
 
