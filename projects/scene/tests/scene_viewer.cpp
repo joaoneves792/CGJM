@@ -75,7 +75,7 @@ void update(){
 		scene->getCamera()->move(timeDelta*movementRate, 0.0f, 0.0f);
 	}
 
-    std::string movingNodeName = "cube";
+    std::string movingNodeName = "table";
     SceneNode* movingNode = scene->findNode(movingNodeName);
 
     if(keyboardStatus[UP] && movingNode != nullptr){
