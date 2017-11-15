@@ -159,25 +159,36 @@ void prepareGroup(objGroup* group){
                     uniqueVertex->index = currentIndex;
                     uniqueFaces[faceIndex].indexes[i] = currentIndex;
                     currentIndex++;
+                    map[s] = uniqueVertex;
                 }
             }
             faceIndex++;
         }
-
 
         /*Now put them in a list and sort them*/
         std::list<objUniqueVertex*> uniqueVertexList;
         for(auto it = map.begin(); it!= map.end(); it++){
             uniqueVertexList.push_back(it->second);
         }
+        map.clear();
+
         uniqueVertexList.sort([](const objUniqueVertex* a, const objUniqueVertex* b){ return (a->index < b->index);});
+        std::vector<objUniqueVertex*> uniqueVertexVector;
+        for(objUniqueVertex* v : uniqueVertexList){
+            uniqueVertexVector.push_back(v);
+        }
+        uniqueVertexList.clear();
 
-        /*TODO see libhobby3d code on how to efficiently upload the stuff we have now*/
+        auto vertices  = new GLfloat[uniqueVertexVector.size()*3];
+        GLfloat *normals;
+        GLfloat *texCoords;
 
-        auto vertices  = new GLfloat[group->faces.size()*3*3];
-        auto normals   = new GLfloat[group->faces.size()*3*3];
-        auto texCoords = new GLfloat[group->faces.size()*2*3];
-
+        if(!group->normals.empty()) {
+            normals = new GLfloat[uniqueVertexVector.size() * 3];
+        }
+        if(!group->texCoords.empty()) {
+            texCoords = new GLfloat[uniqueVertexVector.size() * 2];
+        }
         auto indices  = new GLushort[group->faces.size()*3];
 
         GLushort vi=0;
@@ -185,31 +196,28 @@ void prepareGroup(objGroup* group){
         GLushort ti=0;
         GLushort ii=0;
 
-        for(objFace* f : group->faces){
-            for(int i=0; i<3; i++){
-                objVertex* v = group->vertices[f->vertices[i]-1];
-                vertices[vi++] = v->vertex[0];
-                vertices[vi++] = v->vertex[1];
-                vertices[vi++] = v->vertex[2];
 
-                if(!group->normals.empty()) {
-                    objNormal *n = group->normals[f->normals[i]-1];
-                    normals[ni++] = n->normal[0];
-                    normals[ni++] = n->normal[1];
-                    normals[ni++] = n->normal[2];
-                }
-                if(!group->texCoords.empty()){
-                    objTexCoord* t = group->texCoords[f->texCoords[i]-1];
-                    texCoords[ti++] = t->uv[0];
-                    texCoords[ti++] = t->uv[1];
-                }
+        for(objUniqueVertex* v: uniqueVertexVector){
+            vertices[vi++] = v->vertex[0];
+            vertices[vi++] = v->vertex[1];
+            vertices[vi++] = v->vertex[2];
+
+            if(!group->normals.empty()) {
+                normals[ni++] = v->normal[0];
+                normals[ni++] = v->normal[1];
+                normals[ni++] = v->normal[2];
             }
-            indices[ii] = ii;
-            ii++;
-            indices[ii] = ii;
-            ii++;
-            indices[ii] = ii;
-            ii++;
+            if(!group->texCoords.empty()){
+                texCoords[ti++] = v->texCoord[0];
+                texCoords[ti++] = v->texCoord[1];
+            }
+        }
+
+        for(size_t i=0; i< group->faces.size();i++){
+            objUniqueFace f = uniqueFaces[i];
+            indices[ii++] = (GLshort )f.indexes[0];
+            indices[ii++] = (GLshort )f.indexes[1];
+            indices[ii++] = (GLshort )f.indexes[2];
         }
 
         glGenBuffers(3, group->vbos);
@@ -232,8 +240,6 @@ void prepareGroup(objGroup* group){
             glEnableVertexAttribArray(NORMALS__ATTR);
             glVertexAttribPointer(NORMALS__ATTR, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, 0);
         }
-
-        //Set up the indices (Not very usefull right now see TODO)
         glGenBuffers(1, &(group->eab));
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, group->eab);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*ii , indices, GL_STATIC_DRAW);
@@ -241,8 +247,18 @@ void prepareGroup(objGroup* group){
         //Free all the temporary memory
         delete[] vertices;
         delete[] indices;
-        delete[] normals;
-        delete[] texCoords;
+        if(!group->normals.empty()) {
+            delete[] normals;
+        }
+        if(!group->texCoords.empty()) {
+            delete[] texCoords;
+        }
+
+        for(objUniqueVertex* v: uniqueVertexVector){
+            delete v;
+        }
+        uniqueVertexVector.clear();
+        delete[] uniqueFaces;
     }
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
