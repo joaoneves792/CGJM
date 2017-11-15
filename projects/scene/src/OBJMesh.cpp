@@ -259,7 +259,6 @@ void prepareGroup(objGroup* group){
             delete v;
         }
         uniqueVertexVector.clear();
-        delete[] uniqueFaces;
     }
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

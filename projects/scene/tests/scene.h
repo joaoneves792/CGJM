@@ -21,7 +21,7 @@ enum tangram{
 
 
 
-SceneGraph* setupScene();
+void setupScene(const std::string& name);
 void destroyScene(SceneGraph* scene);
 
 #endif //CGJM_SCENE_H

@@ -16,7 +16,7 @@ int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
-#define SCENE_NAME "main"
+const std::string SCENE_NAME = "main";
 
 #define W 0
 #define A 1
@@ -320,7 +320,8 @@ void init(int argc, char* argv[])
 	setupGLEW();
 	setupOpenGL();
     setupCallbacks();
-    setupScene();
+
+    setupScene(SCENE_NAME);
 
     keyboardStatus[W] = 0;
     keyboardStatus[A] = 0;

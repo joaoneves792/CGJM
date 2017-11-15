@@ -15,16 +15,8 @@ extern keyframe floating[];
 extern keyframe floatingBox[];
 extern keyframe box[];
 
-/////////////////////////////////////////////////////////////////////// SCENE
-SceneGraph* setupScene(){
+void loadMeshes(){
     ResourceManager* rm = ResourceManager::getInstance();
-
-    auto camera = new SphereCamera(10.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
-    //auto camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
-
-    auto rootNode = new SceneNode("root");
-    auto scene = new SceneGraph(camera, rootNode);
-
     //Load Models
     auto floor = new OBJMesh("res/floor.obj");
     auto table = new OBJMesh("res/table.obj");
@@ -37,8 +29,10 @@ SceneGraph* setupScene(){
     rm->addMesh("triangle", triangle);
     rm->addMesh("square", square);
     rm->addMesh("parallelogram", parallelogram);
+}
 
-
+void loadShaders(){
+    ResourceManager* rm = ResourceManager::getInstance();
     //Load Shaders
     auto tableShader = new Shader("res/tablev.glsl", "res/tablef.glsl");
     tableShader->setAttribLocation("inPosition", VERTICES__ATTR);
@@ -66,17 +60,41 @@ SceneGraph* setupScene(){
     tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
     tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
     tangramShader->link();
-    const int colorUniform = tangramShader->getUniformLocation("color");
     tangramShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
         int uniformLocation = tangramShader->getUniformLocation("MVP");
         glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (P*V*M).transpose());
     });
     checkOpenGLError("ERROR: Could not create shaders.");
 
-
     rm->addShader("table", tableShader);
     rm->addShader("floor", floorShader);
     rm->addShader("tangram", tangramShader);
+}
+
+/////////////////////////////////////////////////////////////////////// SCENE
+void setupScene(const std::string& name){
+    ResourceManager* rm = ResourceManager::getInstance();
+
+    auto camera = new SphereCamera(10.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(M_PI/4.0f, Vec3(1.0f, 0.0f, 0.0f)));
+    //auto camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
+
+    auto rootNode = new SceneNode("root");
+    auto scene = new SceneGraph(camera, rootNode);
+    rm->addScene(name, scene);
+
+    loadMeshes();
+    loadShaders();
+
+    OBJMesh* table = rm->getMesh("table");
+    OBJMesh* floor = rm->getMesh("floor");
+    OBJMesh* triangle = rm->getMesh("triangle");
+    OBJMesh* square = rm->getMesh("square");
+    OBJMesh* parallelogram = rm->getMesh("parallelogram");
+
+    Shader* tableShader = rm->getShader("table");
+    Shader* floorShader = rm->getShader("floor");
+    Shader* tangramShader = rm->getShader("tangram");
+    const int colorUniform = tangramShader->getUniformLocation("color");
 
     //Create Nodes
     auto tableNode = new SceneNode("table", table, tableShader);
@@ -142,10 +160,7 @@ SceneGraph* setupScene(){
     tangramNodes[tan_l_triangle2] = largeTriangle2Node;
 
     //Place all parts according to "original" keyframe
-    applyAnimation( original, original, 1.0f);
-
-    rm->addScene("main", scene);
-    return scene;
+    applyAnimation(original, original, 1.0f);
 }
 
 
