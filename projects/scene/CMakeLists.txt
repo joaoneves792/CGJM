@@ -15,7 +15,8 @@ set(SOURCE_FILES
 		src/SphereCamera.cpp
 		src/FreeCamera.cpp
 		src/Camera.cpp
-		src/SceneGraph.cpp)
+		src/SceneGraph.cpp
+		src/ResourceManager.cpp)
 set(TEST_FILES
 		tests/scene_viewer.cpp
 		tests/scene.cpp

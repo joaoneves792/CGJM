@@ -15,6 +15,7 @@
 #include "FreeCamera.h"
 #include "OBJMesh.h"
 #include "SceneGraph.h"
+#include "ResourceManager.h"
 
 
 #endif //CGJM_CGJENGINE_H

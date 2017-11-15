@@ -16,9 +16,7 @@ int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
-
-#define VERTICES 0
-#define SHADES 1
+#define SCENE_NAME "main"
 
 #define W 0
 #define A 1
@@ -36,18 +34,18 @@ unsigned char keyboardStatus[10];
 int mouseX = WinX/2;
 int mouseY = WinY/2;
 
-SceneGraph* scene;
-
 /////////////////////////////////////////////////////////////////////// CALLBACKS
 void cleanup()
 {
-	destroyScene(scene);
+    ResourceManager::getInstance()->destroyEverything();
+    ResourceManager::getInstance()->deleteInstance();
 }
 
 void display()
 {
 	++FrameCount;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
 	scene->draw();
 	checkOpenGLError("ERROR: Could not draw scene.");
 	glutSwapBuffers();
@@ -60,6 +58,7 @@ void update(){
     int timeDelta = currentTime-lastTime;
     lastTime = currentTime;
 
+    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
     /*Update camera movement*/
     float movementRate = 0.005; //magic number
     if(keyboardStatus[W]){
@@ -111,6 +110,7 @@ void reshape(int w, int h)
 	WinX = w;
 	WinY = h;
 	glViewport(0, 0, WinX, WinY);
+    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
     scene->getCamera()->perspective((float)M_PI/4, (WinX/WinY), 0.1, 100);
 	//scene->getCamera()->ortho(-2, 2, -2, 2, 0, 10);
 }
@@ -136,7 +136,8 @@ void mouseTimer(int value)
 	glutWarpPointer(WinX/2, WinY/2);
 	mouseX = WinX / 2;
 	mouseY = WinY / 2;
-	
+
+    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
 	scene->getCamera()->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
     glutTimerFunc(10, mouseTimer, 0);
 }
@@ -319,7 +320,7 @@ void init(int argc, char* argv[])
 	setupGLEW();
 	setupOpenGL();
     setupCallbacks();
-    scene = setupScene();
+    setupScene();
 
     keyboardStatus[W] = 0;
     keyboardStatus[A] = 0;

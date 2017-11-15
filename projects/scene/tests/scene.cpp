@@ -8,9 +8,6 @@
 
 #define interpolate(v1, v2, t)  (1 - t) * v1 + t * v2
 
-std::vector<OBJMesh*> meshes;
-std::vector<Shader*> shaders;
-
 SceneNode* tangramNodes[TANGRAM_PIECES_COUNT];
 
 extern keyframe original[];
@@ -20,6 +17,8 @@ extern keyframe box[];
 
 /////////////////////////////////////////////////////////////////////// SCENE
 SceneGraph* setupScene(){
+    ResourceManager* rm = ResourceManager::getInstance();
+
     auto camera = new SphereCamera(10.0f, Vec3(0.0f, 0.0f, 0.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
     //auto camera = new FreeCamera(Vec3(0.0f, 0.0f, 5.0f), Quat(0.0f, Vec3(0.0f, 1.0f, 0.0f)));
 
@@ -28,19 +27,20 @@ SceneGraph* setupScene(){
 
     //Load Models
     auto floor = new OBJMesh("res/floor.obj");
-    meshes.push_back(floor);
     auto table = new OBJMesh("res/table.obj");
-    meshes.push_back(table);
     auto triangle = new OBJMesh("res/triangle_rot.obj");
-    meshes.push_back(triangle);
     auto square = new OBJMesh("res/square_rot.obj");
-    meshes.push_back(square);
     auto parallelogram = new OBJMesh("res/parallelogram_rot.obj");
-    meshes.push_back(parallelogram);
+
+    rm->addMesh("floor", floor);
+    rm->addMesh("table", table);
+    rm->addMesh("triangle", triangle);
+    rm->addMesh("square", square);
+    rm->addMesh("parallelogram", parallelogram);
+
 
     //Load Shaders
     auto tableShader = new Shader("res/tablev.glsl", "res/tablef.glsl");
-    shaders.push_back(tableShader);
     tableShader->setAttribLocation("inPosition", VERTICES__ATTR);
     /*tableShader->setAttribLocation("inTexcoord", TEXCOORDS_ATTR);*/
     tableShader->setAttribLocation("inNormal", NORMALS__ATTR);
@@ -55,7 +55,6 @@ SceneGraph* setupScene(){
     });
 
     auto floorShader = new Shader("res/floorv.glsl", "res/floorf.glsl");
-    shaders.push_back(floorShader);
     floorShader->setAttribLocation("inPosition", VERTICES__ATTR);
     floorShader->link();
     floorShader->setMVPFunction([=](Mat4 M, Mat4 V, Mat4 P){
@@ -64,7 +63,6 @@ SceneGraph* setupScene(){
     });
 
     auto tangramShader = new Shader("res/tangramOBJv.shader", "res/tangramOBJf.shader");
-    shaders.push_back(tangramShader);
     tangramShader->setAttribLocation("inPosition", VERTICES__ATTR);
     tangramShader->setAttribLocation("inNormal", NORMALS__ATTR);
     tangramShader->link();
@@ -75,6 +73,10 @@ SceneGraph* setupScene(){
     });
     checkOpenGLError("ERROR: Could not create shaders.");
 
+
+    rm->addShader("table", tableShader);
+    rm->addShader("floor", floorShader);
+    rm->addShader("tangram", tangramShader);
 
     //Create Nodes
     auto tableNode = new SceneNode("table", table, tableShader);
@@ -142,27 +144,8 @@ SceneGraph* setupScene(){
     //Place all parts according to "original" keyframe
     applyAnimation( original, original, 1.0f);
 
+    rm->addScene("main", scene);
     return scene;
 }
 
 
-void destroyScene(SceneGraph* scene) {
-    //Destroy meshes
-    for (OBJMesh *m : meshes) {
-        m->unload();
-        delete m;
-    }
-    meshes.clear();
-
-    //Destroy shaders
-    glUseProgram(0);
-    for (Shader *s: shaders) {
-        delete s;
-    }
-    checkOpenGLError("ERROR: Could not destroy shaders.");
-
-    //Destroy Scene
-    delete scene->getCamera();
-    scene->destroy();
-    delete scene;
-}

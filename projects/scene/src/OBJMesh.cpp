@@ -245,6 +245,7 @@ void prepareGroup(objGroup* group){
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort)*ii , indices, GL_STATIC_DRAW);
 
         //Free all the temporary memory
+        delete[] uniqueFaces;
         delete[] vertices;
         delete[] indices;
         if(!group->normals.empty()) {

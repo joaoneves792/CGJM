@@ -8,7 +8,13 @@
 #include <functional>
 #include <list>
 #include <string>
-#include "CGJengine.h"
+
+#include "vec.h"
+#include "mat.h"
+#include "quat.h"
+#include "Shader.h"
+#include "OBJMesh.h"
+#include "Camera.h"
 
 class SceneGraph;
 
