@@ -9,30 +9,14 @@
 #include "scene.h"
 #include "animation.h"
 
-
 #define CAPTION "SCENE VIEWER (ESC:quit F:Animate ARROWS:Move WASDQE:Camera)"
+#define ESCAPE 27
 
 int WinX = 1024, WinY = 1024;
 int WindowHandle = 0;
 unsigned int FrameCount = 0;
 
 const std::string SCENE_NAME = "main";
-
-#define W 0
-#define A 1
-#define S 2
-#define D 3
-#define Q 4
-#define E 5
-#define UP 6
-#define DOWN 7
-#define RIGHT 8
-#define LEFT 9
-
-#define ESCAPE 27
-unsigned char keyboardStatus[10];
-int mouseX = WinX/2;
-int mouseY = WinY/2;
 
 /////////////////////////////////////////////////////////////////////// CALLBACKS
 void cleanup()
@@ -57,43 +41,6 @@ void update(){
     int currentTime = glutGet(GLUT_ELAPSED_TIME);
     int timeDelta = currentTime-lastTime;
     lastTime = currentTime;
-
-    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
-    /*Update camera movement*/
-    float movementRate = 0.005; //magic number
-    if(keyboardStatus[W]){
-		scene->getCamera()->move(0.0f, 0.0f, -(timeDelta*movementRate));
-    }
-	if(keyboardStatus[A]){
-		scene->getCamera()->move(-timeDelta*movementRate, 0.0f, 0.0f);
-	}
-    if(keyboardStatus[S]){
-		scene->getCamera()->move(0.0f, 0.0f, timeDelta*movementRate);
-    }
-	if(keyboardStatus[D]){
-		scene->getCamera()->move(timeDelta*movementRate, 0.0f, 0.0f);
-	}
-
-    std::string movingNodeName = "table";
-    SceneNode* movingNode = scene->findNode(movingNodeName);
-
-    if(keyboardStatus[UP] && movingNode != nullptr){
-        movingNode->translate(0.0f, 0.0f, -(timeDelta*movementRate));
-    }
-    if(keyboardStatus[DOWN] && movingNode != nullptr){
-        movingNode->translate(0.0f, 0.0f, (timeDelta*movementRate));
-    }
-    if(keyboardStatus[LEFT] && movingNode != nullptr){
-        movingNode->translate(-(timeDelta*movementRate), 0.0f, 0.0f);
-    }
-    if(keyboardStatus[RIGHT] && movingNode != nullptr){
-        movingNode->translate((timeDelta*movementRate), 0.0f, 0.0f);
-    }
-
-    /*Update camera roll*/
-    if(keyboardStatus[Q] || keyboardStatus[E]) {
-		scene->getCamera()->changeOrientation(0.0f, 0.0f, ((keyboardStatus[Q])?-1:1)*(timeDelta*movementRate));
-    }
 
     updateScene(timeDelta);
     
@@ -126,121 +73,85 @@ void timer(int value)
     glutTimerFunc(1000, timer, 0);
 }
 
-void mouseTimer(int value)
-{
-	//Wthis is executed every 10ms, necessary since the values vary a alot between Win and linux
-
-	float cameraRate = (float)-1.0f*(M_PI / (WinX*2));
-    int deltaX = (WinX/2) - mouseX;
-    int deltaY = (WinY/2) - mouseY;
-	glutWarpPointer(WinX/2, WinY/2);
-	mouseX = WinX / 2;
-	mouseY = WinY / 2;
-
-    SceneGraph* scene = ResourceManager::getInstance()->getScene(SCENE_NAME);
-	scene->getCamera()->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
-    glutTimerFunc(10, mouseTimer, 0);
-}
-
 void keyboard(unsigned char key, int x, int y){
-    switch(key){
-        case 'w':
-            keyboardStatus[W] = key;
-            return;
-        case 'a':
-            keyboardStatus[A] = key;
-            return;
-        case 's':
-            keyboardStatus[S] = key;
-            return;
-        case 'd':
-            keyboardStatus[D] = key;
-            return;
-        case 'q':
-            keyboardStatus[Q] = key;
-            return;
-        case 'e':
-            keyboardStatus[E] = key;
-            return;
-        case 'f':
-            animate();
-            return;
-        case ESCAPE:
-            glutLeaveMainLoop();
-            return;
-        default:
-            return;
-    }
+	InputManager::getInstance()->keyDown(key);
 }
 
 void keyboardUp(unsigned char key, int x, int y){
-    switch(key){
-        case 'w':
-            keyboardStatus[W] = 0;
-            return;
-        case 'a':
-            keyboardStatus[A] = 0;
-            return;
-        case 's':
-            keyboardStatus[S] = 0;
-            return;
-        case 'd':
-            keyboardStatus[D] = 0;
-            return;
-        case 'q':
-            keyboardStatus[Q] = 0;
-            return;
-        case 'e':
-            keyboardStatus[E] = 0;
-            return;
-        default:
-            return;
-    }
+    InputManager::getInstance()->keyUp(key);
 }
 
 void specialKeyboard(int key, int x, int y){
-    switch(key){
-        case GLUT_KEY_UP:
-            keyboardStatus[UP] = 1;
-            break;
-        case GLUT_KEY_DOWN:
-            keyboardStatus[DOWN] = 1;
-            break;
-        case GLUT_KEY_LEFT:
-            keyboardStatus[LEFT] = 1;
-            break;
-        case GLUT_KEY_RIGHT:
-            keyboardStatus[RIGHT] = 1;
-            break;
-        default:
-            return;
-    }
+    InputManager::getInstance()->specialKeyDown(key);
 }
 
 void specialKeyboardUp(int key, int x, int y){
-    switch(key){
-        case GLUT_KEY_UP:
-            keyboardStatus[UP] = 0;
-            break;
-        case GLUT_KEY_DOWN:
-            keyboardStatus[DOWN] = 0;
-            break;
-        case GLUT_KEY_LEFT:
-            keyboardStatus[LEFT] = 0;
-            break;
-        case GLUT_KEY_RIGHT:
-            keyboardStatus[RIGHT] = 0;
-            break;
-        default:
-            return;
-    }
+    InputManager::getInstance()->specialKeyUp(key);
 }
 
 void mouse(int x, int y) {
-	mouseX = x;
-	mouseY = y;
+    InputManager::getInstance()->mouseMovement(x, y);
 }
 
+void setupActions(const std::string& sceneName) {
+    SceneGraph *scene = ResourceManager::getInstance()->getScene(sceneName);
+    InputManager *im = InputManager::getInstance();
+
+    im->setActionInterval(10); //Update every 10ms
+
+    /*Update camera movement*/
+    const float movementRate = 0.005; //magic number
+    const float cameraRate = (float)-1.0f*(M_PI / (WinX*2));
+
+    im->setMouseAction([=](int x, int y, int timeDelta){
+        int deltaX = (WinX/2) - x;
+        int deltaY = (WinY/2) - y;
+        glutWarpPointer(WinX/2, WinY/2);
+        scene->getCamera()->changeOrientation(deltaX*cameraRate, deltaY*cameraRate, 0.0f);
+    });
+
+    im->addKeyAction('w', [=](int timeDelta){
+        scene->getCamera()->move(0.0f, 0.0f, -(timeDelta * movementRate));
+    });
+    im->addKeyAction('a', [=](int timeDelta){
+        scene->getCamera()->move(-timeDelta * movementRate, 0.0f, 0.0f);
+    });
+    im->addKeyAction('s', [=](int timeDelta){
+        scene->getCamera()->move(0.0f, 0.0f, timeDelta * movementRate);
+    });
+    im->addKeyAction('d', [=](int timeDelta){
+        scene->getCamera()->move(timeDelta * movementRate, 0.0f, 0.0f);
+    });
+    im->addKeyAction('q', [=](int timeDelta){
+        scene->getCamera()->changeOrientation(0.0f, 0.0f, -(timeDelta * movementRate));
+    });
+    im->addKeyAction('e', [=](int timeDelta){
+        scene->getCamera()->changeOrientation(0.0f, 0.0f, (timeDelta * movementRate));
+    });
+    im->addKeyAction('f', [=](int timeDelta){
+        animate();
+    });
+    im->addKeyAction(ESCAPE, [=](int timeDelta){
+        glutLeaveMainLoop();
+    });
+
+    std::string movingNodeName = "table";
+    SceneNode *movingNode = scene->findNode(movingNodeName);
+
+    im->addSpecialKeyAction(GLUT_KEY_UP, [=](int timeDelta){
+        movingNode->translate(0.0f, 0.0f, -(timeDelta * movementRate));
+    });
+    im->addSpecialKeyAction(GLUT_KEY_DOWN, [=](int timeDelta){
+        movingNode->translate(0.0f, 0.0f, (timeDelta * movementRate));
+    });
+    im->addSpecialKeyAction(GLUT_KEY_LEFT, [=](int timeDelta){
+        movingNode->translate(-(timeDelta * movementRate), 0.0f, 0.0f);
+    });
+    im->addSpecialKeyAction(GLUT_KEY_RIGHT, [=](int timeDelta){
+        movingNode->translate((timeDelta * movementRate), 0.0f, 0.0f);
+    });
+
+}
 /////////////////////////////////////////////////////////////////////// SETUP
 
 void setupCallbacks() 
@@ -250,7 +161,6 @@ void setupCallbacks()
 	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
 	glutTimerFunc(0,timer,0);
-	glutTimerFunc(0,mouseTimer,0);
 	glutPassiveMotionFunc(mouse);
 	glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
@@ -319,20 +229,11 @@ void init(int argc, char* argv[])
 	setupGLUT(argc, argv);
 	setupGLEW();
 	setupOpenGL();
-    setupCallbacks();
 
     setupScene(SCENE_NAME);
+    setupActions(SCENE_NAME);
 
-    keyboardStatus[W] = 0;
-    keyboardStatus[A] = 0;
-    keyboardStatus[S] = 0;
-    keyboardStatus[D] = 0;
-    keyboardStatus[Q] = 0;
-    keyboardStatus[E] = 0;
-    keyboardStatus[UP] = 0;
-    keyboardStatus[DOWN] = 0;
-    keyboardStatus[LEFT] = 0;
-    keyboardStatus[RIGHT] = 0;
+	setupCallbacks();
 }
 
 int main(int argc, char* argv[])

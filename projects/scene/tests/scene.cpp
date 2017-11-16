@@ -1,12 +1,11 @@
 //
 // Created by joao on 11/13/17.
 //
-
+#include <GL/glew.h>
 #include "CGJengine.h"
 #include "scene.h"
 #include "animation.h"
 
-#define interpolate(v1, v2, t)  (1 - t) * v1 + t * v2
 
 SceneNode* tangramNodes[TANGRAM_PIECES_COUNT];
 
@@ -162,5 +161,4 @@ void setupScene(const std::string& name){
     //Place all parts according to "original" keyframe
     applyAnimation(original, original, 1.0f);
 }
-
 

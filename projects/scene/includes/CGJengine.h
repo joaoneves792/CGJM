@@ -16,6 +16,7 @@
 #include "OBJMesh.h"
 #include "SceneGraph.h"
 #include "ResourceManager.h"
+#include "InputManager.h"
 
 
 #endif //CGJM_CGJENGINE_H
